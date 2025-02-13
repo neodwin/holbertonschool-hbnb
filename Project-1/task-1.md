@@ -2,31 +2,45 @@
 
 classDiagram
     class User {
-        -String Name
-        -int PosX
-        -int PosY
-        +Despawn() void
+        +userID
+        +surname
+        +name
+        +adress
+        +phone
+        +age
+        +email
+        +birthdate
+        +Role
+        #password
+        +rent()
+        +pay()
+        +register()
+        +addreview()
+        +IsOwner()
+        +MakeListing()
     }
     class Place {
-        +int MaxHealth
-        -int Health
-        +IsDead() bool
-        +TakeDamage(int damage) void
-        +OnKilled()* void
+        +area
+        +location
+        +GPS
+        +numberofrooms
+        +price
+        +check-in
+        +Isfree()
     }
     class Review {
-        +int MaxHealth
-        -int Health
-        +IsDead() bool
-        +TakeDamage(int damage) void
-        +OnKilled()* void
+        +UserName
+        +UserMail
+        +Notations
+        +Language
+        +evaluate()
     }
     class Amenity {
-        +int MaxHealth
-        -int Health
-        +IsDead() bool
-        +TakeDamage(int damage) void
-        +OnKilled()* void
+        +cleaning
+        +handicaps
+        +animals
+        +children
+        +Iswithfurnitures()
     }
 
-    GameObject <|-- DamageableObject
+    User --> Place
