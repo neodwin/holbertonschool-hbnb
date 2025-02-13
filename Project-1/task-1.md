@@ -44,3 +44,6 @@ classDiagram
     }
 
     User --> Place
+    User --> Review
+    Review --> Place
+    Place <-- Amenity
