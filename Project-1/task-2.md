@@ -9,4 +9,4 @@ sequenceDiagram
     User->>Ad: Confirm
     System->>Availability: Check
     System->>CallReservation: Create
-    System->>ConfirmResermation: Confirmation
+    System->>ConfirmReservation: Confirmation
