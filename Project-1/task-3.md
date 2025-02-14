@@ -1,359 +1,138 @@
-# HBnB Technical Documentation
+# Documentation for HBnB Website
 
-## Introduction
+This documentation presents the architecture of an HBnB website using various UML diagrams. Each diagram highlights a specific aspect of the system, from the overall structure to detailed business logic.
 
-This technical document serves as a comprehensive blueprint for the HBnB (Holberton BnB) project, a web application designed to facilitate property rentals and bookings. This document outlines the system's architecture, component interactions, and implementation guidelines through detailed diagrams and explanations.
+## Package Diagram
+### Description of the Package Diagram
 
-### Purpose and Scope
-- Provide a clear architectural overview of the HBnB system
-- Document the system's components and their interactions
-- Guide the implementation process
-- Serve as a reference for developers and stakeholders
+The package diagram illustrates the modular structure of the system by defining the main layers and components. The system is divided into several packages representing the website's functionalities and responsibilities.
 
-## 1. High-Level Architecture
+#### Main Packages
 
-### Package Diagram
-```mermaid
-classDiagram
-    %% Facade Pattern (declared first to influence layout)
-    class BusinessFacade {
-        <<Interface>>
-        createEntity()
-        readEntity()
-        updateEntity()
-        deleteEntity()
-    }
+1. User
 
-    %% Layers as containers
-    class PresentationLayer["Presentation Layer"] {
-        <<Layer>>
-    }
-    class BusinessLogicLayer["Business Logic Layer"] {
-        <<Layer>>
-    }
-    class PersistenceLayer["Persistence Layer"] {
-        <<Layer>>
-    }
+    * Manages user sign-up, login, and profile management.
+    * Features: Authentication, personal information management.
 
-    %% Components in Presentation Layer
-    class API {
-        RESTful Endpoints
-        Request Handling
-        Response Formatting
-    }
-    class WebServices {
-        User Interface
-        Client Communication
-    }
+2. Reservation
 
-    %% Components in Business Logic Layer
-    class Models {
-        User
-        Place
-        Review
-        Amenity
-        State
-        City
-    }
-    class DomainLogic {
-        Business Rules
-        Validation
-        Processing
-    }
+    * Handles search, booking, and reservation history for users.
+    * Features: Search for listings, manage bookings, and payments.
 
-    %% Components in Persistence Layer
-    class Repository {
-        DatabaseOperations
-        DataMapping
-        QueryExecution
-    }
-    class Database {
-        Storage
-        Retrieval
-        Transactions
-    }
+3. Host
 
-    %% Relationships to influence layout
-    BusinessFacade --> BusinessLogicLayer
-    BusinessLogicLayer --> PersistenceLayer
+    * Allows hosts to publish and manage their listings.
+    * Features: Create new listings, manage prices, and availability.
 
-    %% Layer composition
-    PresentationLayer *-- API
-    PresentationLayer *-- WebServices
-    BusinessLogicLayer *-- Models
-    BusinessLogicLayer *-- DomainLogic
-    PersistenceLayer *-- Repository
-    PersistenceLayer *-- Database
+3. Property
 
-    %% Facade relationships
-    API --> BusinessFacade
-    WebServices --> BusinessFacade
-    BusinessFacade --> Models
-    BusinessFacade --> DomainLogic
-    DomainLogic --> Repository
-    Repository --> Database
+    * Describes information related to the available properties for rent.
+    * Features: Property details, photos, amenities.
 
-    %% Additional relationships
-    Models --> DomainLogic
-```
+4. Payment
 
-### Architecture Overview
-The system follows a three-layer architecture pattern with a Facade interface:
+    * Manages payments, transactions, and refunds.
+    * Features: Secure payment, invoice, and refund management.
 
-1. **Presentation Layer**
-   - Handles user interactions and API endpoints
-   - Manages request/response formatting
-   - Contains RESTful API and web services
+## Class Diagram
 
-2. **Business Logic Layer**
-   - Implements core business logic through the Facade pattern
-   - Manages domain models and business rules
-   - Handles data validation and processing
+### Description of the Class Diagram
 
-3. **Persistence Layer**
-   - Manages data storage and retrieval
-   - Handles database operations and transactions
-   - Provides data mapping services
+The class diagram details the main entities of the system, along with their attributes and relationships. It provides a visualization of the data structure and the interactions between the objects within the system.
 
-## 2. Business Logic Layer Details
+#### Main Classes
 
-### Class Diagram
-```mermaid
-classDiagram
-    class BaseModel {
-        <<abstract>>
-        +id: UUID
-        +created_at: DateTime
-        +updated_at: DateTime
-        +save() void
-        +to_dict() dict
-        +__str__() String
-        +delete() void
-        #validate() bool
-    }
+1. ##### User
 
-    class User {
-        +email: String
-        -password_hash: Bytes
-        -salt: Bytes
-        +first_name: String
-        +last_name: String
-        +address: String
-        +phone: String
-        +birth_date: Date
-        +age: Integer
-        +role: UserRole
-        -owned_places: List~Place~
-        -reviews: List~Review~
-        +create_listing(place: Place) Place
-        +add_review(place: Place, comment: String, rating: Integer) Review
-        +update_profile(data: dict) void
-        +get_listings() List~Place~
-        +change_password(old_pwd: String, new_pwd: String) bool
-        +verify_email() bool
-        -hash_password(password: String, salt: Bytes) Bytes
-        -verify_password(password: String) bool
-    }
+* ##### Attributes:
+    * userID
+    * name
+    * email
+    * password
+    * address
 
-    class Place {
-        +name: String
-        +description: String
-        +area: Float
-        +address: String
-        +latitude: Float
-        +longitude: Float
-        +max_guests: Integer
-        +number_rooms: Integer
-        +number_bathrooms: Integer
-        +price_per_night: Float
-        +owner: User
-        +amenities: List~Amenity~
-        +is_available: Boolean
-        -reviews: List~Review~
-        +average_rating: Float
-        +update_listing(data: dict) void
-        +get_reviews() List~Review~
-        +calculate_rating() Float
-        +add_amenity(amenity: Amenity) void
-        +remove_amenity(amenity: Amenity) void
-        -validate_coordinates() bool
-    }
+* ##### Methods:
+    * register()
+    * login()
+    * updateProfile()
+    
+2. ##### Property
 
-    class Review {
-        +reviewer: User
-        +place: Place
-        +rating: Integer
-        +comment: String
-        +language: String
-        +review_date: DateTime
-        -is_verified: Boolean
-        +update_review(comment: String, rating: Integer) void
-        +delete_review() void
-        +translate(target_language: String) String
-        +get_reviewer_info() dict
-        +mark_as_helpful() void
-        +report_inappropriate() void
-        -validate_rating() bool
-    }
+* ##### Attributes:
+    * propertyID
+    * name
+    * description
+    * price
+    * location
+    * availability
+* Methods:
+    * addProperty()
+    * updateAvailability()
+    * showDetails()
+    
+3. ##### Reservation
 
-    class Amenity {
-        +name: String
-        +description: String
-        +is_available: Boolean
-        +category: String
-        -additional_cost: Float
-        -associated_places: List~Place~
-        +update_availability(status: Boolean) void
-        +get_places() List~Place~
-        +set_additional_cost(cost: Float) void
-        +get_total_cost(days: Integer) Float
-    }
+* Attributes:
+    * reservationID
+    * userID
+    * propertyID
+    * startDate
+    * endDate
+    * totalAmount
+* Methods:
+    * makeReservation()
+    * cancelReservation()
+    * calculateTotalAmount()
 
-    BaseModel <|-- User
-    BaseModel <|-- Place
-    BaseModel <|-- Review
-    BaseModel <|-- Amenity
+4. ##### Payment
 
-    User "1" --> "0..*" Place : owns
-    User "1" --> "0..*" Review : writes
-    Place "1" --> "0..*" Review : has
-    Place "1" *--> "0..*" Amenity : includes
+* Attributes:
+    * paymentID
+    * reservationID
+    * amount
+    * paymentMethod
+    * status
+* Methods:
+    * processPayment()
+    * refund()
 
-    class UserRole {
-        <<enumeration>>
-        GUEST
-        HOST
-        ADMIN
-    }
-```
+## Sequence Diagram
+## Description of the Sequence Diagram
 
-### Key Components
-1. **BaseModel**
-   - Abstract base class providing common functionality
-   - Handles creation and update timestamps
-   - Implements basic CRUD operations
+The sequence diagram illustrates the order of interactions between objects during certain actions on the website. This diagram focuses on a key process: making a reservation.
 
-2. **Domain Models**
-   - User: Manages user accounts and authentication
-   - Place: Handles property listings and amenities
-   - Review: Manages property reviews and ratings
-   - Amenity: Represents property features and services
+## Reservation Process Sequence
 
-## 3. API Interaction Flows
+1. #### User logs in:
 
-### Sequence Diagrams
-```mermaid
-sequenceDiagram
-    %% User Registration Flow
-    participant Client
-    participant API
-    participant UserService
-    participant UserModel
-    participant Database
+    * The user enters their login credentials.
+    * The system verifies the information, and the user is logged in.
 
-    Note over Client,Database: User Registration Flow
-    Client->>API: POST /api/users/register
-    API->>UserService: validateUserData(userData)
-    UserService->>UserModel: createUser(validatedData)
-    UserModel->>Database: save()
-    Database-->>UserModel: confirmSave
-    UserModel-->>UserService: newUser
-    UserService-->>API: userCreated
-    API-->>Client: 201 Created
+2. #### User searches for properties:
 
-    %% Place Creation Flow
-    Note over Client,Database: Place Creation Flow
-    Client->>API: POST /api/places
-    API->>UserService: validateUserAuth()
-    UserService-->>API: userAuthorized
-    API->>PlaceService: validatePlaceData(placeData)
-    PlaceService->>PlaceModel: createPlace(validatedData)
-    PlaceModel->>Database: save()
-    Database-->>PlaceModel: confirmSave
-    PlaceModel-->>PlaceService: newPlace
-    PlaceService-->>API: placeCreated
-    API-->>Client: 201 Created
+    * The user enters search criteria (dates, location, etc.).
+    * The system returns a list of available properties that match the criteria.
 
-    %% Review Submission Flow
-    Note over Client,Database: Review Submission Flow
-    Client->>API: POST /api/places/{id}/reviews
-    API->>UserService: validateUserAuth()
-    UserService-->>API: userAuthorized
-    API->>ReviewService: validateReviewData(reviewData)
-    ReviewService->>PlaceService: checkPlaceExists(placeId)
-    PlaceService-->>ReviewService: placeExists
-    ReviewService->>ReviewModel: createReview(validatedData)
-    ReviewModel->>Database: save()
-    Database-->>ReviewModel: confirmSave
-    ReviewModel-->>ReviewService: newReview
-    ReviewService-->>API: reviewCreated
-    API-->>Client: 201 Created
+3. #### User selects a property:
 
-    %% Fetching Places Flow
-    Note over Client,Database: Fetching Places Flow
-    Client->>API: GET /api/places?filters
-    API->>PlaceService: validateFilters(filters)
-    PlaceService->>PlaceModel: findPlaces(validFilters)
-    PlaceModel->>Database: query(filters)
-    Database-->>PlaceModel: placesList
-    PlaceModel-->>PlaceService: processedPlaces
-    PlaceService-->>API: formattedPlaces
-    API-->>Client: 200 OK with Places
-```
+    * The user selects a property from the list.
+    * The system displays the details of the selected property.
 
-### API Flow Descriptions
+4. #### User books the property:
 
-1. **User Registration**
-   - Validates user input data
-   - Creates new user record
-   - Returns confirmation with user details
-   - Implements proper error handling
+    * The user selects their stay dates and confirms the booking.
+    * The system creates a reservation and calculates the total amount.
 
-2. **Place Creation**
-   - Authenticates user
-   - Validates place data
-   - Creates new place listing
-   - Associates place with owner
+5. #### User processes the payment:
 
-3. **Review Submission**
-   - Verifies user authentication
-   - Validates review data
-   - Checks place existence
-   - Creates and associates review
+    * The system redirects the user to the payment module.
+    * The user enters payment details.
+    * The system processes the transaction and confirms the payment.
 
-4. **Fetching Places**
-   - Processes filter parameters
-   - Queries database with filters
-   - Returns formatted place listings
-   - Implements pagination
+6. #### Reservation is confirmed:
 
-## Implementation Guidelines
-
-1. **Security Considerations**
-   - Implement proper authentication and authorization
-   - Use secure password hashing
-   - Validate all user inputs
-   - Implement rate limiting
-
-2. **Performance Optimization**
-   - Use database indexing
-   - Implement caching where appropriate
-   - Optimize database queries
-   - Use pagination for large datasets
-
-3. **Error Handling**
-   - Implement comprehensive error handling
-   - Use appropriate HTTP status codes
-   - Provide meaningful error messages
-   - Log errors for debugging
-
-4. **Code Organization**
-   - Follow clean code principles
-   - Implement proper separation of concerns
-   - Use meaningful naming conventions
-   - Write comprehensive documentation
+     * The system sends a confirmation email to the user.
+    * The reservation is saved in the database.
 
 ## Conclusion
-
-This technical documentation provides a comprehensive overview of the HBnB system architecture and implementation guidelines. It serves as a reference for developers and stakeholders throughout the development process. Regular updates and maintenance of this documentation will ensure its continued relevance and usefulness.
-
+This documentation provides an overview of the architecture of an HBnB website, using different UML diagrams to describe the main components, relationships, and processes. These diagrams can be used as a basis for developing the website, offering a clear vision of the system's organization and the interaction between its various parts.
