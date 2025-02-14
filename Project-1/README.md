@@ -1,166 +1,103 @@
-# HBnB (Holberton BnB)
+# HBnB Technical Documentation
 
-## Description
-HBnB is a comprehensive property rental platform inspired by AirBnB. This web application facilitates property listings, bookings, and reviews, providing a seamless experience for both hosts and guests.
+## Overview
+This directory contains the complete technical documentation for the HBnB (Holberton BnB) project, including architectural diagrams, design patterns, and implementation guidelines.
 
-## Architecture
-The application follows a three-layer architecture:
-- **Presentation Layer**: Handles user interface and API endpoints
-- **Business Logic Layer**: Manages core business rules and data processing
-- **Persistence Layer**: Handles data storage and retrieval
+## Document Structure
 
-### Key Features
-- User authentication and authorization
-- Property listing management
-- Booking system
-- Review and rating system
-- Search and filtering capabilities
-- Amenity management
+### 1. Package Diagram (`task-0.md`)
+- High-level architecture visualization
+- Three-tier architecture implementation
+- Facade pattern design
+- Component relationships and responsibilities
+- Layer descriptions:
+  - Presentation Layer (API & Web UI)
+  - Business Logic Layer (Models & Services)
+  - Persistence Layer (Database & Repository)
 
-## Technical Stack
+### 2. Class Diagram (`task-1.md`)
+- Detailed business logic layer design
+- Core domain models:
+  - BaseModel (Abstract base class)
+  - User (Account management)
+  - Place (Property listings)
+  - Review (User feedback)
+  - Amenity (Property features)
+- Entity relationships and inheritance patterns
+- Data model attributes and methods
 
-### Backend
-- Python 3.8+
-- Flask/Django (Web Framework)
-- SQLAlchemy (ORM)
-- PostgreSQL (Database)
+### 3. Sequence Diagrams (`task-2.md`)
+Key API interaction flows with error handling:
+1. User Registration
+   - Success path and validation
+   - Error scenarios (400, 409, 500)
 
-### Frontend
-- HTML5/CSS3
-- JavaScript (ES6+)
-- React.js
-- Bootstrap 5
+2. Place Creation
+   - Authentication flow
+   - Error handling (401, 400, 500)
 
-### DevOps & Tools
-- Git (Version Control)
-- Docker (Containerization)
-- Nginx (Web Server)
-- Gunicorn (WSGI Server)
+3. Review Submission
+   - Authorization checks
+   - Error scenarios (404, 401, 400)
 
-## Installation
+4. Place Listing Retrieval
+   - Filter processing
+   - Error handling (400, 204, 500)
 
-### Prerequisites
-- Python 3.8+
-- pip (Python package manager)
-- PostgreSQL
-- Node.js and npm
-- Docker (optional)
+### 4. Complete Documentation (`task-3.md`)
+Comprehensive technical blueprint including:
+- Architectural overview
+- Design patterns implementation
+- Error handling strategy
+- Security considerations
+- Performance optimization
+- Code organization
+- Implementation guidelines
 
-### Local Setup
-1. Clone the repository
-```bash
-git clone https://github.com/yourusername/hbnb.git
-cd hbnb
-```
+## Key Technical Decisions
 
-2. Create and activate virtual environment
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+### Architecture
+- Three-tier architecture for separation of concerns
+- Facade pattern for simplified interface
+- RESTful API design
+- Modular component structure
 
-3. Install dependencies
-```bash
-pip install -r requirements.txt
-npm install  # For frontend dependencies
-```
+### Data Management
+- UUID-based identification
+- Timestamp tracking
+- Automated validation
+- Relationship management
 
-4. Configure environment variables
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
+### Security
+- JWT authentication
+- Role-based access control
+- Input validation at multiple levels
+- Secure password handling
 
-5. Initialize the database
-```bash
-python manage.py db init
-python manage.py db migrate
-python manage.py db upgrade
-```
+### Error Handling
+- Standardized HTTP status codes
+- Consistent error response format
+- Comprehensive error logging
+- Multiple validation layers
 
-6. Run the development server
-```bash
-python manage.py runserver
-```
+## Implementation Stack
+- Backend: Python with Flask/Django
+- Database: PostgreSQL
+- ORM: SQLAlchemy
+- Frontend: React.js with Bootstrap
+- Authentication: JWT
+- Caching: Redis
 
-### Docker Setup
-```bash
-docker-compose up --build
-```
-
-## API Documentation
-
-### Authentication
-- POST `/api/users/register`: Register new user
-- POST `/api/users/login`: User login
-- POST `/api/users/logout`: User logout
-
-### Places
-- GET `/api/places`: List all places
-- POST `/api/places`: Create new place
-- GET `/api/places/{id}`: Get place details
-- PUT `/api/places/{id}`: Update place
-- DELETE `/api/places/{id}`: Delete place
-
-### Reviews
-- GET `/api/places/{id}/reviews`: Get place reviews
-- POST `/api/places/{id}/reviews`: Create review
-- PUT `/api/reviews/{id}`: Update review
-- DELETE `/api/reviews/{id}`: Delete review
-
-### Amenities
-- GET `/api/amenities`: List all amenities
-- POST `/api/amenities`: Create amenity
-- PUT `/api/amenities/{id}`: Update amenity
-- DELETE `/api/amenities/{id}`: Delete amenity
-
-## Testing
-```bash
-# Run unit tests
-python -m pytest tests/unit
-
-# Run integration tests
-python -m pytest tests/integration
-
-# Run with coverage
-coverage run -m pytest
-coverage report
-```
-
-## Contributing
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## Code Style
-- Follow PEP 8 for Python code
-- Use ESLint for JavaScript code
-- Write descriptive commit messages
-- Include docstrings and comments
-
-## Project Structure
-```
-hbnb/
-├── api/                 # API endpoints
-├── models/             # Data models
-├── services/           # Business logic
-├── static/             # Static files
-├── templates/          # HTML templates
-├── tests/              # Test files
-├── config.py           # Configuration
-├── requirements.txt    # Python dependencies
-└── README.md          # This file
-```
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Getting Started
+1. Review the architecture overview in `task-0.md`
+2. Study the domain model in `task-1.md`
+3. Understand API flows in `task-2.md`
+4. Consult implementation details in `task-3.md`
 
 ## Authors
-- Your Name - Initial work - [YourGithub](https://github.com/yourusername)
+- Ewan
+- Edwin
+- Frederic
 
-## Acknowledgments
-- Holberton School for the project requirements and guidance
-- AirBnB for inspiration
-- All contributors who have helped shape this project
+## License
+This project is licensed under the MIT License
