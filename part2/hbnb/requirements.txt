@@ -1,0 +1,8 @@
+# Framework principal pour l'application web
+flask==3.0.2
+
+# Extension Flask pour créer des API REST avec documentation Swagger
+flask-restx==1.3.0
+
+# Framework de test pour Python
+pytest==8.0.2 
