@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask import request
 
 api = Namespace('users', description='User operations')
 
@@ -34,13 +35,15 @@ class UserList(Resource):
     @api.response(201, 'User successfully created', user_response_model)
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new user"""
-        user_data = api.payload
+        """Create a new user"""
         try:
+            user_data = api.payload
             new_user = facade.create_user(user_data)
             return new_user.to_dict(), 201
         except ValueError as e:
             api.abort(400, str(e))
+        except Exception as e:
+            api.abort(500, str(e))
 
 @api.route('/<user_id>')
 @api.param('user_id', 'The user identifier')

@@ -1,6 +1,8 @@
 import json
 import pytest
 from app import create_app
+import time
+import uuid
 
 @pytest.fixture
 def client():
@@ -12,12 +14,27 @@ def client():
 @pytest.fixture
 def test_user(client):
     """Create a test user and return their ID"""
+    # Use a UUID to ensure email uniqueness
+    unique_id = str(uuid.uuid4())
+    unique_email = f"test.owner.{unique_id}@example.com"
+    
     response = client.post('/api/v1/users/', json={
         'first_name': 'Test',
         'last_name': 'Owner',
-        'email': 'test.owner@example.com'
+        'email': unique_email
     })
-    return json.loads(response.data)['id']
+    
+    # Debug output
+    print(f"User creation response status: {response.status_code}")
+    print(f"User creation response data: {response.data}")
+    
+    # Parse the response data
+    data = json.loads(response.data)
+    print(f"Parsed user data: {data}")
+    print(f"Keys in user data: {data.keys()}")
+    
+    # Return the user ID
+    return data['id']
 
 @pytest.fixture
 def test_amenities(client):
