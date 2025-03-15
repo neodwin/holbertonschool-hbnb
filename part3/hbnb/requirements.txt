@@ -1,0 +1,23 @@
+# Flask : Framework web léger pour Python, utilisé comme base de l'application
+flask==3.0.2
+
+# Flask-RESTX : Extension de Flask pour créer facilement des API RESTful avec Swagger
+flask-restx==1.3.0
+
+# Pytest : Framework de test pour exécuter les tests unitaires et d'intégration
+pytest==8.0.2
+
+# Flask-Bcrypt : Extension de Flask pour le hachage sécurisé des mots de passe
+flask-bcrypt==1.0.1
+
+# Flask-JWT-Extended : Extension de Flask pour la gestion des tokens JWT (authentification)
+flask-jwt-extended==4.6.0
+
+# SQLAlchemy : ORM (Object Relational Mapper) pour interagir avec la base de données
+sqlalchemy==2.0.27
+
+# Flask-SQLAlchemy : Intégration de SQLAlchemy avec Flask
+flask-sqlalchemy==3.1.1
+
+# PyMySQL : Pilote de base de données MySQL pour Python (utilisé avec SQLAlchemy)
+pymysql==1.1.0 
