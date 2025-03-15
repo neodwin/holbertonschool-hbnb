@@ -29,7 +29,7 @@ class Config:
     # Désactivation du suivi des modifications pour améliorer les performances
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # URI de la base de données par défaut (SQLite)
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///hbnb.db')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///instance/hbnb_dev.db')
 
 class DevelopmentConfig(Config):
     """

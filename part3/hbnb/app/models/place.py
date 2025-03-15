@@ -44,7 +44,7 @@ class Place(BaseModel):
     amenities = db.relationship('Amenity', secondary=place_amenity, lazy='dynamic',
                                backref=db.backref('places', lazy='dynamic'))
     
-    def __init__(self, title, description, price, latitude, longitude, owner, **kwargs):
+    def __init__(self, title, description, price, latitude, longitude, owner=None, owner_id=None, **kwargs):
         """
         Initialise un nouvel objet Place avec validation des données.
         
@@ -54,7 +54,8 @@ class Place(BaseModel):
             price (float): Prix par nuit
             latitude (float): Coordonnée géographique
             longitude (float): Coordonnée géographique
-            owner (User): Utilisateur propriétaire du logement
+            owner (User, optional): Utilisateur propriétaire du logement
+            owner_id (str, optional): ID de l'utilisateur propriétaire (utilisé si owner n'est pas fourni)
             **kwargs: Attributs supplémentaires pour la classe parente
             
         Raises:
@@ -65,6 +66,10 @@ class Place(BaseModel):
         self.validate_price(price)
         self.validate_coordinates(latitude, longitude)
         
+        # Déterminer owner_id à utiliser
+        # Si owner est fourni, utiliser son ID, sinon utiliser l'owner_id fourni
+        final_owner_id = owner.id if owner else owner_id
+        
         # Appel au constructeur de la classe parente (BaseModel)
         super().__init__(
             title=title,
@@ -72,7 +77,7 @@ class Place(BaseModel):
             price=float(price),  # Conversion explicite en float
             latitude=float(latitude),  # Conversion explicite en float
             longitude=float(longitude),  # Conversion explicite en float
-            owner_id=owner.id,  # Stockage de l'ID du propriétaire
+            owner_id=final_owner_id,  # Utiliser l'ID du propriétaire déterminé
             **kwargs
         )
         
@@ -84,7 +89,7 @@ class Place(BaseModel):
         
         # Ajoute ce logement à la liste des logements du propriétaire
         # Cette étape sera automatisée par les relations ORM plus tard
-        if hasattr(owner, 'add_place'):
+        if owner and hasattr(owner, 'add_place'):
             owner.add_place(self)
 
     @staticmethod

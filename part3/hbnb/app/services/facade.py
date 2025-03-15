@@ -192,8 +192,11 @@ class HBnBFacade:
                     amenities.append(amenity)
             
             # Crée le logement
-            place_data['owner'] = owner
-            place = self.place_repo.create_place(place_data)
+            # Note : on ne modifie pas owner_id car c'est ce que le modèle attend directement
+            # Créer une copie des données pour éviter de modifier le dictionnaire original
+            place_creation_data = place_data.copy()
+            place_creation_data['owner'] = owner  # Ajouter l'objet owner pour le constructeur de Place
+            place = self.place_repo.create_place(place_creation_data)
             
             # Ajoute les équipements au logement
             for amenity in amenities:
@@ -203,6 +206,10 @@ class HBnBFacade:
             return place
         except ValueError as e:
             raise e
+        except Exception as e:
+            # Ajouter un log d'erreur plus détaillé pour les autres exceptions
+            db.session.rollback()
+            raise ValueError(f"Erreur lors de la création du logement: {str(e)}")
 
     def get_place(self, place_id):
         """
