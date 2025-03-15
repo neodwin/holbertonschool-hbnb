@@ -96,6 +96,7 @@ class UserList(Resource):
     
     @api.doc('create_user')
     @api.expect(user_model, validate=True)
+    @api.marshal_with(user_response_model)
     @api.response(201, 'Utilisateur créé avec succès', user_response_model)
     @api.response(400, 'Données d\'entrée invalides')
     def post(self):
