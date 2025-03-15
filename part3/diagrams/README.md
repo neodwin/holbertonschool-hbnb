@@ -1,57 +1,57 @@
-# Diagrammes pour HBnB
+# Diagrams for HBnB
 
-Ce répertoire contient les diagrammes pour le projet HBnB, créés avec Mermaid.js.
+This directory contains diagrams for the HBnB project, created with Mermaid.js.
 
-## Contenu
+## Contents
 
-- `er_diagram.md` : Diagramme Entity-Relationship (ER) pour la base de données
-- `class_diagram.md` : Diagramme de classe pour les modèles SQLAlchemy
-- `architecture_diagram.md` : Diagramme d'architecture pour l'application
+- `er_diagram.md`: Entity-Relationship (ER) diagram for the database
+- `class_diagram.md`: Class diagram for SQLAlchemy models
+- `architecture_diagram.md`: Architecture diagram for the application
 
-## À propos de Mermaid.js
+## About Mermaid.js
 
-[Mermaid.js](https://mermaid.js.org/) est un outil de génération de diagrammes basé sur JavaScript qui permet de créer des diagrammes à partir d'une syntaxe de type Markdown. Il est particulièrement utile pour créer des diagrammes ER, des diagrammes de classe, des diagrammes de séquence, des diagrammes de flux, etc.
+[Mermaid.js](https://mermaid.js.org/) is a JavaScript-based diagram generation tool that allows you to create diagrams from Markdown-like syntax. It's particularly useful for creating ER diagrams, class diagrams, sequence diagrams, flowcharts, etc.
 
-## Comment visualiser les diagrammes
+## How to View the Diagrams
 
-### Option 1 : GitHub
+### Option 1: GitHub
 
-Si vous consultez ces fichiers sur GitHub, les diagrammes Mermaid sont automatiquement rendus dans l'interface web.
+If you're viewing these files on GitHub, Mermaid diagrams are automatically rendered in the web interface.
 
-### Option 2 : Éditeur Mermaid Live
+### Option 2: Mermaid Live Editor
 
-Vous pouvez copier-coller le code Mermaid dans l'[éditeur Mermaid Live](https://mermaid.live/) pour visualiser et modifier les diagrammes.
+You can copy and paste the Mermaid code into the [Mermaid Live Editor](https://mermaid.live/) to view and modify the diagrams.
 
-### Option 3 : Extensions VS Code
+### Option 3: VS Code Extensions
 
-Si vous utilisez VS Code, vous pouvez installer l'extension [Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) pour visualiser les diagrammes directement dans l'éditeur.
+If you're using VS Code, you can install the [Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) extension to view diagrams directly in the editor.
 
-## Types de diagrammes
+## Types of Diagrams
 
-### Diagramme ER (Entity-Relationship)
+### ER Diagram (Entity-Relationship)
 
-Le diagramme ER représente la structure de la base de données, montrant les tables, leurs attributs et les relations entre elles. Il est utile pour comprendre comment les données sont organisées et liées dans la base de données.
+The ER diagram represents the database structure, showing tables, their attributes, and relationships between them. It's useful for understanding how data is organized and linked in the database.
 
-### Diagramme de classe
+### Class Diagram
 
-Le diagramme de classe représente la structure des classes Python utilisées dans le projet, montrant les attributs, les méthodes et les relations entre les classes. Il est utile pour comprendre l'architecture orientée objet du projet.
+The class diagram represents the structure of Python classes used in the project, showing attributes, methods, and relationships between classes. It's useful for understanding the object-oriented architecture of the project.
 
-### Diagramme d'architecture
+### Architecture Diagram
 
-Le diagramme d'architecture représente la structure globale de l'application, montrant les différentes couches et leurs interactions. Il est utile pour comprendre comment les différentes parties de l'application fonctionnent ensemble.
+The architecture diagram represents the overall structure of the application, showing the different layers and their interactions. It's useful for understanding how the different parts of the application work together.
 
-## Structure du projet HBnB
+## HBnB Project Structure
 
-Le projet HBnB est structuré en plusieurs couches :
+The HBnB project is structured in several layers:
 
-1. **Couche Présentation** : API REST avec authentification JWT
-2. **Couche Métier** : Façade (HBnBFacade) qui centralise la logique métier
-3. **Couche Persistance** : Repositories qui gèrent l'accès aux données
-4. **Couche Données** : Base de données SQLite/MySQL
+1. **Presentation Layer**: REST API with JWT authentication
+2. **Business Layer**: Facade (HBnBFacade) that centralizes business logic
+3. **Persistence Layer**: Repositories that manage data access
+4. **Data Layer**: SQLite/MySQL database
 
-Les entités principales du projet sont :
+The main entities of the project are:
 
-1. **User** : Utilisateurs de l'application
-2. **Place** : Lieux/propriétés à louer
-3. **Review** : Avis des utilisateurs sur les lieux
-4. **Amenity** : Équipements/commodités disponibles dans les lieux 
+1. **User**: Application users
+2. **Place**: Properties/locations for rent
+3. **Review**: User reviews of places
+4. **Amenity**: Facilities/amenities available in places 

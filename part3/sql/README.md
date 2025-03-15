@@ -1,79 +1,84 @@
-# SQL Scripts for HBnB Database
+# Scripts SQL pour la Base de Données HBnB
 
-This directory contains SQL scripts to create and manage the HBnB database schema.
+Ce répertoire contient les scripts SQL nécessaires pour créer et gérer le schéma de la base de données HBnB.
 
-## Files
+## Fichiers
 
-- `schema.sql`: Creates the database schema (tables, constraints, indexes)
-- `initial_data.sql`: Inserts initial data (admin user, amenities, sample place)
-- `crud_test.sql`: Tests CRUD operations (Create, Read, Update, Delete)
-- `constraint_test.sql`: Tests database constraints and referential integrity
-- `setup_database.sh`: Shell script to set up the database and run all scripts
+- `schema.sql` : Crée le schéma de la base de données (tables, contraintes, index)
+- `initial_data.sql` : Insère les données initiales (utilisateur administrateur, équipements, exemple de logement)
+- `crud_test.sql` : Teste les opérations CRUD (Création, Lecture, Mise à jour, Suppression)
+- `constraint_test.sql` : Teste les contraintes de la base de données et l'intégrité référentielle
+- `setup_database.sh` : Script shell pour configurer la base de données et exécuter tous les scripts
 
-## Database Schema
+## Schéma de la Base de Données
 
-The database schema consists of the following tables:
+Le schéma de la base de données comprend les tables suivantes :
 
-1. `users`: Stores user information
-   - Primary key: `id`
-   - Unique constraint: `email`
+1. `users` : Stocke les informations des utilisateurs
+   - Clé primaire : `id`
+   - Contrainte d'unicité : `email`
+   - Contient le hash du mot de passe, les informations personnelles et les statuts administrateur
 
-2. `amenities`: Stores amenity information
-   - Primary key: `id`
-   - Unique constraint: `name`
+2. `amenities` : Stocke les informations sur les équipements/commodités
+   - Clé primaire : `id`
+   - Contrainte d'unicité : `name`
+   - Permet d'enregistrer les différentes options disponibles dans les logements
 
-3. `places`: Stores place information
-   - Primary key: `id`
-   - Foreign key: `owner_id` references `users(id)`
+3. `places` : Stocke les informations sur les logements
+   - Clé primaire : `id`
+   - Clé étrangère : `owner_id` référence `users(id)`
+   - Contient le titre, la description, le prix et les coordonnées géographiques
 
-4. `reviews`: Stores review information
-   - Primary key: `id`
-   - Foreign key: `place_id` references `places(id)`
-   - Foreign key: `user_id` references `users(id)`
-   - Unique constraint: `(place_id, user_id)` (a user can only review a place once)
+4. `reviews` : Stocke les avis sur les logements
+   - Clé primaire : `id`
+   - Clé étrangère : `place_id` référence `places(id)`
+   - Clé étrangère : `user_id` référence `users(id)`
+   - Contrainte d'unicité : `(place_id, user_id)` (un utilisateur ne peut donner qu'un seul avis par logement)
+   - Contient le texte de l'avis et la note attribuée
 
-5. `place_amenity`: Association table for the many-to-many relationship between places and amenities
-   - Primary key: `(place_id, amenity_id)`
-   - Foreign key: `place_id` references `places(id)`
-   - Foreign key: `amenity_id` references `amenities(id)`
+5. `place_amenity` : Table d'association pour la relation plusieurs-à-plusieurs entre logements et équipements
+   - Clé primaire : `(place_id, amenity_id)`
+   - Clé étrangère : `place_id` référence `places(id)`
+   - Clé étrangère : `amenity_id` référence `amenities(id)`
+   - Permet d'associer plusieurs équipements à un logement et vice-versa
 
-## Usage
+## Utilisation
 
-### Setting up the database
+### Configuration de la base de données
 
-To set up the database and run all scripts, use the `setup_database.sh` script:
+Pour configurer la base de données et exécuter tous les scripts, utilisez le script `setup_database.sh` :
 
 ```bash
 cd part3/sql
 ./setup_database.sh
 ```
 
-This will:
-1. Create a new SQLite database file (`hbnb.db`)
-2. Create the database schema
-3. Insert initial data
-4. Run CRUD tests
-5. Run constraint tests (some errors are expected)
+Ce script va :
+1. Créer un nouveau fichier de base de données SQLite (`hbnb.db`)
+2. Créer le schéma de la base de données
+3. Insérer les données initiales
+4. Exécuter les tests CRUD
+5. Exécuter les tests de contraintes (certaines erreurs sont attendues)
 
-### Exploring the database
+### Explorer la base de données
 
-To explore the database manually, use the SQLite command-line tool:
+Pour explorer manuellement la base de données, utilisez l'outil en ligne de commande SQLite :
 
 ```bash
 cd part3/sql
 sqlite3 hbnb.db
 ```
 
-Some useful SQLite commands:
-- `.tables`: List all tables
-- `.schema [table]`: Show the schema for a table
-- `.headers on`: Show column headers in query results
-- `.mode column`: Format query results as columns
-- `.exit`: Exit SQLite
+Quelques commandes SQLite utiles :
+- `.tables` : Liste toutes les tables
+- `.schema [table]` : Affiche le schéma d'une table
+- `.headers on` : Affiche les en-têtes de colonnes dans les résultats des requêtes
+- `.mode column` : Formate les résultats des requêtes en colonnes
+- `.exit` : Quitte SQLite
 
-### Running individual scripts
+### Exécution de scripts individuels
 
-You can also run individual scripts using the SQLite command-line tool:
+Vous pouvez également exécuter des scripts individuels à l'aide de l'outil en ligne de commande SQLite :
 
 ```bash
 cd part3/sql
@@ -83,7 +88,10 @@ sqlite3 hbnb.db < crud_test.sql
 sqlite3 hbnb.db < constraint_test.sql
 ```
 
-## Notes
+## Remarques
 
-- The `constraint_test.sql` script intentionally includes operations that should fail due to constraint violations. These errors are expected and demonstrate that the database constraints are working correctly.
-- The `setup_database.sh` script will delete any existing `hbnb.db` file before creating a new one. 
+- Le script `constraint_test.sql` inclut intentionnellement des opérations qui devraient échouer en raison de violations de contraintes. Ces erreurs sont attendues et démontrent que les contraintes de la base de données fonctionnent correctement.
+- Le script `setup_database.sh` supprimera tout fichier `hbnb.db` existant avant d'en créer un nouveau.
+- Toutes les tables utilisent des identifiants UUID au format de chaîne pour assurer l'unicité globale des clés.
+- Les suppressions en cascade sont configurées pour maintenir l'intégrité référentielle (par exemple, lorsqu'un utilisateur est supprimé, tous ses logements et avis sont également supprimés).
+- Des index ont été ajoutés sur les clés étrangères fréquemment utilisées pour améliorer les performances des requêtes. 
