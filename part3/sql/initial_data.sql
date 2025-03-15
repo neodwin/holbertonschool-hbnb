@@ -1,35 +1,40 @@
 -- initial_data.sql
--- Script to insert initial data into the HBnB database
+-- Script pour insérer les données initiales dans la base de données HolbertonBnB.
+-- Ce fichier ajoute un utilisateur administrateur, un utilisateur régulier,
+-- des équipements communs et un exemple de logement pour tester l'application.
 
--- Insert admin user
--- Note: In a real application, you would use a secure hashing function for passwords
--- The password hash below is for 'adminpassword' using bcrypt
+-- Insertion de l'utilisateur administrateur
+-- Note: Dans une application réelle, il faudrait générer les hachages de mots de passe
+-- avec une fonction sécurisée et ne pas les stocker en clair dans les scripts
+-- Le hachage ci-dessous correspond au mot de passe 'adminpassword' en utilisant bcrypt
 INSERT INTO users (id, first_name, last_name, email, _password_hash, is_admin, created_at, updated_at)
 VALUES (
-    'admin-uuid-1234-5678-90ab-cdef', -- UUID for admin user
+    'admin-uuid-1234-5678-90ab-cdef', -- UUID pour l'utilisateur admin
     'Admin',
     'User',
     'admin@hbnb.com',
-    '$2b$12$tVN1BzXLlRbUH1EjzWlQYOUJm6TLPDLEMnM6G9BKwAWHxQ5oJbZ4W', -- Hashed 'adminpassword'
+    '$2b$12$tVN1BzXLlRbUH1EjzWlQYOUJm6TLPDLEMnM6G9BKwAWHxQ5oJbZ4W', -- Hachage de 'adminpassword'
     TRUE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 );
 
--- Insert regular user for testing
+-- Insertion d'un utilisateur standard pour les tests
 INSERT INTO users (id, first_name, last_name, email, _password_hash, is_admin, created_at, updated_at)
 VALUES (
-    'user-uuid-1234-5678-90ab-cdef', -- UUID for regular user
+    'user-uuid-1234-5678-90ab-cdef', -- UUID pour l'utilisateur standard
     'Regular',
     'User',
     'user@hbnb.com',
-    '$2b$12$tVN1BzXLlRbUH1EjzWlQYOUJm6TLPDLEMnM6G9BKwAWHxQ5oJbZ4W', -- Hashed 'userpassword'
+    '$2b$12$tVN1BzXLlRbUH1EjzWlQYOUJm6TLPDLEMnM6G9BKwAWHxQ5oJbZ4W', -- Hachage de 'userpassword'
     FALSE,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
 );
 
--- Insert common amenities
+-- Insertion des équipements communs
+-- Cette liste représente les commodités courantes que les utilisateurs
+-- peuvent sélectionner pour leurs logements
 INSERT INTO amenities (id, name, created_at, updated_at) VALUES
 ('amenity-uuid-wifi-0000-0000-0000', 'WiFi', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('amenity-uuid-pool-0000-0000-0000', 'Pool', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -54,7 +59,8 @@ INSERT INTO amenities (id, name, created_at, updated_at) VALUES
 ('amenity-uuid-waterfront-000-0000', 'Waterfront', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('amenity-uuid-ski-000-0000-0000-00', 'Ski-in/Ski-out', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- Insert a sample place owned by the regular user
+-- Insertion d'un exemple de logement appartenant à l'utilisateur standard
+-- Cet exemple permet de tester la fonctionnalité de recherche et d'affichage des logements
 INSERT INTO places (id, title, description, price, latitude, longitude, owner_id, created_at, updated_at)
 VALUES (
     'place-uuid-1234-5678-90ab-cdef',
@@ -68,7 +74,8 @@ VALUES (
     CURRENT_TIMESTAMP
 );
 
--- Add amenities to the sample place
+-- Ajout d'équipements au logement exemple
+-- Association des commodités au logement via la table d'association
 INSERT INTO place_amenity (place_id, amenity_id) VALUES
 ('place-uuid-1234-5678-90ab-cdef', 'amenity-uuid-wifi-0000-0000-0000'),
 ('place-uuid-1234-5678-90ab-cdef', 'amenity-uuid-pool-0000-0000-0000'),
