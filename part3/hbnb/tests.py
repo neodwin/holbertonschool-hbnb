@@ -1,10 +1,23 @@
+#!/usr/bin/env python3
+"""
+Tests unitaires pour les modèles de l'application HolbertonBnB.
+Ce module contient des tests basiques de création et validation pour chaque modèle,
+ainsi que la vérification des relations entre les modèles.
+"""
+
 from app.models.user import User
 from app.models.place import Place
 from app.models.review import Review
 from app.models.amenity import Amenity
 
 def test_user_creation():
-    """Test user creation and validation"""
+    """
+    Teste la création et la validation d'un utilisateur.
+    
+    Ce test vérifie:
+    1. La création correcte d'un utilisateur avec les attributs requis
+    2. L'initialisation par défaut de l'attribut is_admin à False
+    """
     try:
         user = User(first_name="John", last_name="Doe", email="john.doe@example.com")
         assert user.first_name == "John"
@@ -16,7 +29,13 @@ def test_user_creation():
         print(f"✗ User creation test failed: {str(e)}")
 
 def test_place_creation():
-    """Test place creation and relationships"""
+    """
+    Teste la création d'un logement et sa relation avec le propriétaire.
+    
+    Ce test vérifie:
+    1. La création correcte d'un logement avec tous les attributs requis
+    2. La relation bidirectionnelle entre le logement et son propriétaire
+    """
     try:
         owner = User(first_name="Alice", last_name="Smith", email="alice.smith@example.com")
         place = Place(
@@ -37,7 +56,14 @@ def test_place_creation():
         print(f"✗ Place creation test failed: {str(e)}")
 
 def test_review_creation():
-    """Test review creation and relationships"""
+    """
+    Teste la création d'un avis et ses relations avec l'utilisateur et le logement.
+    
+    Ce test vérifie:
+    1. La création correcte d'un avis avec tous les attributs requis
+    2. Les relations entre l'avis, l'utilisateur qui l'a rédigé et le logement concerné
+    3. La validation de la note (rating) qui doit être entre 1 et 5
+    """
     try:
         user = User(first_name="Bob", last_name="Johnson", email="bob.j@example.com")
         owner = User(first_name="Carol", last_name="Wilson", email="carol.w@example.com")
@@ -59,7 +85,13 @@ def test_review_creation():
         print(f"✗ Review creation test failed: {str(e)}")
 
 def test_amenity_creation():
-    """Test amenity creation and place relationship"""
+    """
+    Teste la création d'un équipement et son association avec un logement.
+    
+    Ce test vérifie:
+    1. La création correcte d'un équipement avec un nom valide
+    2. L'association bidirectionnelle entre l'équipement et un logement
+    """
     try:
         owner = User(first_name="David", last_name="Brown", email="david.b@example.com")
         place = Place(
@@ -84,7 +116,15 @@ def test_amenity_creation():
         print(f"✗ Amenity creation test failed: {str(e)}")
 
 def test_validation():
-    """Test input validation"""
+    """
+    Teste les mécanismes de validation des modèles.
+    
+    Ce test vérifie que les modèles rejettent correctement les données invalides:
+    1. Email invalide pour un utilisateur
+    2. Prix négatif pour un logement
+    3. Note (rating) hors plage pour un avis
+    4. Nom vide pour un équipement
+    """
     try:
         # Test invalid email
         try:

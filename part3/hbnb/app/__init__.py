@@ -1,39 +1,67 @@
+#!/usr/bin/env python3
+"""
+Module d'initialisation de l'application HolbertonBnB.
+Ce fichier configure l'application Flask, ses extensions et les routes API.
+Il définit également les gestionnaires d'erreurs personnalisés.
+"""
+
 from flask import Flask, jsonify, render_template_string
-from flask_restx import Api
+from flask_restx import Api  # Extension pour créer des API RESTful avec documentation Swagger
 from app.api.v1.users import api as users_ns
 from app.api.v1.amenities import api as amenities_ns
 from app.api.v1.places import api as places_ns
 from app.api.v1.reviews import api as reviews_ns
 from app.api.v1.auth import api as auth_ns
-from config import config
-from app.extensions import bcrypt, jwt, db
+from config import config  # Configurations pour différents environnements
+from app.extensions import bcrypt, jwt, db  # Extensions Flask importées depuis extensions.py
 import os
 
 def create_app(config_name='default'):
+    """
+    Fonction factory qui crée une instance de l'application Flask.
+    
+    Args:
+        config_name (str): Nom de la configuration à utiliser ('development', 'production', 'testing' ou 'default')
+    
+    Returns:
+        Flask: Instance configurée de l'application Flask
+    """
+    # Création de l'instance Flask
     app = Flask(__name__)
+    
+    # Chargement de la configuration appropriée depuis l'objet config
     app.config.from_object(config[config_name])
     
-    # Initialize extensions
-    bcrypt.init_app(app)
-    jwt.init_app(app)
-    db.init_app(app)
+    # Initialisation des extensions
+    bcrypt.init_app(app)  # Pour le hachage des mots de passe
+    jwt.init_app(app)     # Pour l'authentification JWT
+    db.init_app(app)      # SQLAlchemy pour l'ORM
     
+    # Création de l'API avec Swagger UI accessible à /api/v1/
     api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API', doc='/api/v1/')
 
-    # Register the namespaces
-    api.add_namespace(auth_ns, path='/api/v1/auth')
-    api.add_namespace(users_ns, path='/api/v1/users')
-    api.add_namespace(amenities_ns, path='/api/v1/amenities')
-    api.add_namespace(places_ns, path='/api/v1/places')
-    api.add_namespace(reviews_ns, path='/api/v1/reviews')
+    # Enregistrement des espaces de noms (namespaces) de l'API
+    # Chaque namespace correspond à une ressource REST distincte
+    api.add_namespace(auth_ns, path='/api/v1/auth')       # Pour l'authentification
+    api.add_namespace(users_ns, path='/api/v1/users')     # Pour la gestion des utilisateurs
+    api.add_namespace(amenities_ns, path='/api/v1/amenities')  # Pour les commodités
+    api.add_namespace(places_ns, path='/api/v1/places')   # Pour les logements
+    api.add_namespace(reviews_ns, path='/api/v1/reviews') # Pour les avis
 
-    # Placeholder for API namespaces (endpoints will be added later)
-    # Additional namespaces for places, reviews, and amenities will be added later
-
-    # Add a custom 404 error handler
+    # Gestionnaire d'erreur personnalisé pour les erreurs 404 (page non trouvée)
     @app.errorhandler(404)
     def page_not_found(e):
-        # You can return a custom HTML page
+        """
+        Gestionnaire pour les erreurs 404 - Page non trouvée.
+        Affiche une page HTML personnalisée avec des canards animés.
+        
+        Args:
+            e: L'exception qui a été levée
+            
+        Returns:
+            tuple: HTML à afficher et code de statut 404
+        """
+        # Page HTML avec CSS et JavaScript intégrés pour une expérience ludique
         html = '''
         <!DOCTYPE html>
         <html>
@@ -83,7 +111,7 @@ def create_app(config_name='default'):
                     background-color: #2980b9;
                 }
                 
-                /* Duck styles */
+                /* Styles pour les canards */
                 .duck {
                     position: absolute;
                     font-size: 40px;
@@ -127,12 +155,12 @@ def create_app(config_name='default'):
             </div>
             
             <script>
-                // Create 5 dancing ducks
+                // Création de 5 canards dansants
                 for (let i = 0; i < 5; i++) {
                     createDuck();
                 }
                 
-                // Function to create a duck at random position
+                // Fonction pour créer un canard à une position aléatoire
                 function createDuck() {
                     const duck = document.createElement('div');
                     duck.className = 'duck';
@@ -142,20 +170,20 @@ def create_app(config_name='default'):
                     duck.style.animationDelay = Math.random() * 2 + 's';
                     document.body.appendChild(duck);
                     
-                    // Make the duck quack randomly
+                    // Faire "coincoin" aléatoirement
                     setInterval(() => {
                         if (Math.random() > 0.7) {
                             quack(duck);
                         }
                     }, 3000);
                     
-                    // Make the duck quack when clicked
+                    // Faire "coincoin" lors d'un clic sur le canard
                     duck.addEventListener('click', () => {
                         quack(duck);
                     });
                 }
                 
-                // Function to make a duck quack
+                // Fonction pour faire "coincoin"
                 function quack(duck) {
                     const quackElem = document.createElement('div');
                     quackElem.className = 'quack';
@@ -164,7 +192,7 @@ def create_app(config_name='default'):
                     quackElem.style.top = duck.style.top;
                     document.body.appendChild(quackElem);
                     
-                    // Remove the quack element after animation
+                    // Supprimer l'élément après l'animation
                     setTimeout(() => {
                         quackElem.remove();
                     }, 2000);
@@ -175,9 +203,16 @@ def create_app(config_name='default'):
         '''
         return render_template_string(html), 404
     
-    # Add a root route that redirects to the API documentation
+    # Route racine qui redirige vers la documentation de l'API
     @app.route('/')
     def index():
+        """
+        Route racine de l'application qui redirige vers la documentation de l'API.
+        Utilise une redirection HTML avec meta refresh pour une meilleure compatibilité.
+        
+        Returns:
+            str: HTML de redirection
+        """
         return render_template_string('''
         <!DOCTYPE html>
         <html>

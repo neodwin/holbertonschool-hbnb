@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+"""
+Tests pour l'API des logements (places) de l'application HolbertonBnB.
+Ce module teste les endpoints REST pour la gestion des logements,
+y compris la création, la récupération, la mise à jour et l'association
+avec des utilisateurs et des équipements.
+"""
+
 import json
 import pytest
 from app import create_app
@@ -6,6 +14,16 @@ import uuid
 
 @pytest.fixture
 def client():
+    """
+    Fixture pytest qui fournit un client de test pour les requêtes HTTP.
+    
+    Cette fixture crée une instance de l'application en mode test,
+    et retourne un client qui peut être utilisé pour simuler des 
+    requêtes HTTP vers les endpoints de l'API.
+    
+    Returns:
+        FlaskClient: Un client Flask configuré pour les tests
+    """
     app = create_app()
     app.config['TESTING'] = True
     with app.test_client() as client:
@@ -13,8 +31,19 @@ def client():
 
 @pytest.fixture
 def test_user(client):
-    """Create a test user and return their ID"""
-    # Use a UUID to ensure email uniqueness
+    """
+    Fixture qui crée un utilisateur de test et retourne son ID.
+    
+    Cette fixture est utilisée pour créer un propriétaire pour les logements
+    dans les tests. Elle génère un email unique pour éviter les conflits de duplication.
+    
+    Args:
+        client: Le client de test Flask fourni par la fixture client
+        
+    Returns:
+        str: L'identifiant de l'utilisateur créé
+    """
+    # Utilise un UUID pour garantir l'unicité de l'email
     unique_id = str(uuid.uuid4())
     unique_email = f"test.owner.{unique_id}@example.com"
     
@@ -24,21 +53,32 @@ def test_user(client):
         'email': unique_email
     })
     
-    # Debug output
+    # Informations de débogage
     print(f"User creation response status: {response.status_code}")
     print(f"User creation response data: {response.data}")
     
-    # Parse the response data
+    # Analyse de la réponse
     data = json.loads(response.data)
     print(f"Parsed user data: {data}")
     print(f"Keys in user data: {data.keys()}")
     
-    # Return the user ID
+    # Retourne l'ID de l'utilisateur
     return data['id']
 
 @pytest.fixture
 def test_amenities(client):
-    """Create test amenities and return their IDs"""
+    """
+    Fixture qui crée des équipements de test et retourne leurs IDs.
+    
+    Cette fixture est utilisée pour créer des équipements qui pourront
+    être associés aux logements dans les tests.
+    
+    Args:
+        client: Le client de test Flask fourni par la fixture client
+        
+    Returns:
+        list: Liste d'identifiants des équipements créés
+    """
     amenities = []
     for name in ['Wi-Fi', 'Parking']:
         response = client.post('/api/v1/amenities/', json={'name': name})
@@ -46,8 +86,21 @@ def test_amenities(client):
     return amenities
 
 def test_create_place(client, test_user, test_amenities):
-    """Test place creation endpoint"""
-    # Test successful place creation
+    """
+    Teste l'endpoint de création de logement.
+    
+    Ce test vérifie:
+    1. La création réussie d'un logement avec des données valides
+    2. L'association du logement avec son propriétaire
+    3. L'association du logement avec des équipements
+    4. Le rejet de données invalides
+    
+    Args:
+        client: Le client de test Flask
+        test_user: L'ID de l'utilisateur propriétaire (de la fixture)
+        test_amenities: Liste d'IDs d'équipements (de la fixture)
+    """
+    # Test de création réussie d'un logement
     response = client.post('/api/v1/places/', json={
         'title': 'Cozy Apartment',
         'description': 'A nice place to stay',

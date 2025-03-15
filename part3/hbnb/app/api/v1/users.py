@@ -1,126 +1,218 @@
+#!/usr/bin/env python3
+"""
+API pour la gestion des utilisateurs dans l'application HolbertonBnB.
+Ce module définit les endpoints REST pour créer, lire, mettre à jour et supprimer
+des utilisateurs, ainsi que pour gérer l'authentification des utilisateurs.
+"""
+
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
-api = Namespace('users', description='User operations')
+# Création du namespace pour les utilisateurs
+api = Namespace('users', description='Opérations liées aux utilisateurs')
 
-# Define the user model for input validation and documentation
+# Définition du modèle utilisateur pour la validation des entrées et la documentation
 user_model = api.model('User', {
-    'first_name': fields.String(required=True, description='First name of the user'),
-    'last_name': fields.String(required=True, description='Last name of the user'),
-    'email': fields.String(required=True, description='Email address'),
-    'password': fields.String(required=True, description='User password')
+    'first_name': fields.String(required=True, description='Prénom de l\'utilisateur'),
+    'last_name': fields.String(required=True, description='Nom de famille de l\'utilisateur'),
+    'email': fields.String(required=True, description='Adresse email'),
+    'password': fields.String(required=True, description='Mot de passe de l\'utilisateur')
 })
 
-# Define the user update model (password optional)
+# Définition du modèle de mise à jour d'utilisateur (mot de passe optionnel)
 user_update_model = api.model('UserUpdate', {
-    'first_name': fields.String(description='First name of the user'),
-    'last_name': fields.String(description='Last name of the user'),
-    'email': fields.String(description='Email address'),
-    'password': fields.String(description='User password')
+    'first_name': fields.String(description='Prénom de l\'utilisateur'),
+    'last_name': fields.String(description='Nom de famille de l\'utilisateur'),
+    'email': fields.String(description='Adresse email'),
+    'password': fields.String(description='Mot de passe de l\'utilisateur')
 })
 
-# Define the user response model (no password)
+# Définition du modèle de réponse utilisateur (sans exposer le mot de passe)
 user_response_model = api.model('UserResponse', {
-    'id': fields.String(description='Unique identifier of the user'),
-    'first_name': fields.String(description='First name of the user'),
-    'last_name': fields.String(description='Last name of the user'),
-    'email': fields.String(description='Email address'),
-    'is_admin': fields.Boolean(description='Admin status'),
-    'created_at': fields.String(description='Creation timestamp'),
-    'updated_at': fields.String(description='Last update timestamp')
+    'id': fields.String(description='Identifiant unique de l\'utilisateur'),
+    'first_name': fields.String(description='Prénom de l\'utilisateur'),
+    'last_name': fields.String(description='Nom de famille de l\'utilisateur'),
+    'email': fields.String(description='Adresse email'),
+    'is_admin': fields.Boolean(description='Indique si l\'utilisateur est administrateur'),
+    'created_at': fields.String(description='Date de création du compte'),
+    'updated_at': fields.String(description='Date de dernière mise à jour')
 })
 
-# Define login model
-login_model = api.model('Login', {
-    'email': fields.String(required=True, description='Email address'),
-    'password': fields.String(required=True, description='User password')
+# Modèle de connexion utilisateur
+login_model = api.model('UserLoginModel', {
+    'email': fields.String(required=True, description='Adresse email'),
+    'password': fields.String(required=True, description='Mot de passe')
 })
 
-# Define token response model
-token_model = api.model('Token', {
-    'access_token': fields.String(description='JWT access token')
+# Modèle de réponse pour le token
+token_model = api.model('TokenModel', {
+    'access_token': fields.String(description='Token JWT d\'accès')
 })
 
 @api.route('/login')
 class UserLogin(Resource):
+    """
+    Endpoint de connexion utilisateur.
+    Authentifie l'utilisateur et renvoie un token JWT.
+    """
     @api.doc('user_login')
     @api.expect(login_model, validate=True)
-    @api.response(200, 'Login successful', token_model)
-    @api.response(401, 'Invalid credentials')
+    @api.response(200, 'Connexion réussie', token_model)
+    @api.response(401, 'Identifiants invalides')
     def post(self):
-        """User login endpoint"""
+        """
+        Authentifie un utilisateur et génère un token JWT.
+        
+        Returns:
+            dict: Contenant le token JWT si l'authentification réussit
+            
+        Raises:
+            401: Si les identifiants sont invalides
+        """
         data = api.payload
-        try:
-            token = facade.authenticate_user(data['email'], data['password'])
-            if not token:
-                api.abort(401, 'Invalid credentials')
-            return {'access_token': token}
-        except Exception as e:
-            api.abort(500, str(e))
+        token = facade.authenticate_user(data['email'], data['password'])
+        if not token:
+            api.abort(401, 'Identifiants invalides')
+        return {'access_token': token}
 
 @api.route('/')
 class UserList(Resource):
+    """
+    Collection d'utilisateurs.
+    Permet de lister tous les utilisateurs et d'en créer de nouveaux.
+    """
     @api.doc('list_users')
     @api.marshal_list_with(user_response_model)
     def get(self):
-        """List all users (public endpoint)"""
-        users = facade.get_all_users()
-        return [user.to_dict() for user in users]
-
+        """
+        Récupère la liste de tous les utilisateurs.
+        
+        Returns:
+            list: Liste des utilisateurs enregistrés
+        """
+        return facade.get_all_users()
+    
     @api.doc('create_user')
     @api.expect(user_model, validate=True)
-    @api.response(201, 'User successfully created', user_response_model)
-    @api.response(400, 'Invalid input data')
+    @api.response(201, 'Utilisateur créé avec succès', user_response_model)
+    @api.response(400, 'Données d\'entrée invalides')
     def post(self):
-        """Create a new user (public endpoint)"""
+        """
+        Crée un nouvel utilisateur.
+        
+        Returns:
+            dict: Informations de l'utilisateur créé
+            
+        Raises:
+            400: Si les données fournies sont invalides ou si l'email est déjà utilisé
+        """
         try:
-            user_data = api.payload
-            new_user = facade.create_user(user_data)
-            return new_user.to_dict(), 201
+            user = facade.create_user(api.payload)
+            return user, 201
         except ValueError as e:
             api.abort(400, str(e))
-        except Exception as e:
-            api.abort(500, str(e))
 
 @api.route('/<user_id>')
-@api.param('user_id', 'The user identifier')
+@api.param('user_id', 'Identifiant de l\'utilisateur')
 class UserResource(Resource):
+    """
+    Ressource utilisateur individuelle.
+    Permet de récupérer, mettre à jour ou supprimer un utilisateur spécifique.
+    """
     @api.doc('get_user')
-    @api.response(200, 'Success', user_response_model)
-    @api.response(404, 'User not found')
+    @api.response(200, 'Succès', user_response_model)
+    @api.response(404, 'Utilisateur non trouvé')
     def get(self, user_id):
-        """Get user details by ID (public endpoint)"""
+        """
+        Récupère les informations d'un utilisateur par son ID.
+        
+        Args:
+            user_id (str): Identifiant de l'utilisateur
+            
+        Returns:
+            dict: Informations de l'utilisateur
+            
+        Raises:
+            404: Si l'utilisateur n'existe pas
+        """
         user = facade.get_user(user_id)
         if not user:
-            api.abort(404, 'User not found')
-        return user.to_dict()
-
+            api.abort(404, f"Utilisateur avec l'id {user_id} non trouvé")
+        return user
+    
     @api.doc('update_user')
     @api.expect(user_update_model)
-    @api.response(200, 'User successfully updated', user_response_model)
-    @api.response(404, 'User not found')
-    @api.response(400, 'Invalid input data')
-    @api.response(403, 'Permission denied')
+    @api.response(200, 'Utilisateur mis à jour avec succès', user_response_model)
+    @api.response(404, 'Utilisateur non trouvé')
+    @api.response(400, 'Données d\'entrée invalides')
+    @api.response(403, 'Permission refusée')
     @jwt_required()
     def put(self, user_id):
-        """Update user details (authenticated endpoint)"""
-        user_data = api.payload
+        """
+        Met à jour les informations d'un utilisateur.
+        Nécessite d'être connecté comme l'utilisateur concerné ou comme administrateur.
+        
+        Args:
+            user_id (str): Identifiant de l'utilisateur à mettre à jour
+            
+        Returns:
+            dict: Informations de l'utilisateur mises à jour
+            
+        Raises:
+            404: Si l'utilisateur n'existe pas
+            400: Si les données fournies sont invalides
+            403: Si l'utilisateur connecté n'a pas les permissions nécessaires
+        """
+        # Vérification des permissions
         current_user_id = get_jwt_identity()
         claims = get_jwt()
         is_admin = claims.get('is_admin', False)
         
-        # Only allow users to update their own profile unless they are admin
-        if current_user_id != user_id and not is_admin:
-            api.abort(403, 'Permission denied')
-            
+        # Vérifier si l'utilisateur est admin ou s'il modifie son propre profil
+        if not is_admin and current_user_id != user_id:
+            api.abort(403, "Vous n'avez pas la permission de modifier cet utilisateur")
+        
         try:
-            user = facade.update_user(user_id, user_data)
+            user = facade.update_user(user_id, api.payload)
             if not user:
-                api.abort(404, 'User not found')
-            return user.to_dict()
+                api.abort(404, f"Utilisateur avec l'id {user_id} non trouvé")
+            return user
         except ValueError as e:
             api.abort(400, str(e))
-        except Exception as e:
-            api.abort(500, str(e))
+            
+    @api.doc('delete_user')
+    @api.response(200, 'Utilisateur supprimé avec succès')
+    @api.response(404, 'Utilisateur non trouvé')
+    @api.response(403, 'Permission refusée')
+    @jwt_required()
+    def delete(self, user_id):
+        """
+        Supprime un utilisateur.
+        Nécessite d'être connecté comme l'utilisateur concerné ou comme administrateur.
+        
+        Args:
+            user_id (str): Identifiant de l'utilisateur à supprimer
+            
+        Returns:
+            dict: Message de confirmation
+            
+        Raises:
+            404: Si l'utilisateur n'existe pas
+            403: Si l'utilisateur connecté n'a pas les permissions nécessaires
+        """
+        # Vérification des permissions
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        
+        # Vérifier si l'utilisateur est admin ou s'il supprime son propre profil
+        if not is_admin and current_user_id != user_id:
+            api.abort(403, "Vous n'avez pas la permission de supprimer cet utilisateur")
+        
+        success = facade.delete_user(user_id)
+        if not success:
+            api.abort(404, f"Utilisateur avec l'id {user_id} non trouvé")
+            
+        return {"message": "Utilisateur supprimé avec succès"}

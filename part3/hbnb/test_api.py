@@ -1,17 +1,43 @@
+#!/usr/bin/env python3
+"""
+Tests pour l'API des utilisateurs de l'application HolbertonBnB.
+Ce module teste les endpoints REST pour la gestion des utilisateurs,
+y compris la création, la récupération, et la mise à jour.
+"""
+
 import json
 import pytest
 from app import create_app
 
 @pytest.fixture
 def client():
+    """
+    Fixture pytest qui fournit un client de test pour les requêtes HTTP.
+    
+    Cette fixture crée une instance de l'application en mode test,
+    et retourne un client qui peut être utilisé pour simuler des 
+    requêtes HTTP vers les endpoints de l'API.
+    
+    Returns:
+        FlaskClient: Un client Flask configuré pour les tests
+    """
     app = create_app()
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
 
 def test_create_user(client):
-    """Test user creation endpoint"""
-    # Test successful user creation
+    """
+    Teste l'endpoint de création d'utilisateur.
+    
+    Ce test vérifie:
+    1. La création réussie d'un utilisateur avec des données valides
+    2. Le rejet des tentatives de création d'utilisateurs avec un email déjà utilisé
+    
+    Args:
+        client: Le client de test Flask fourni par la fixture
+    """
+    # Test de création réussie d'un utilisateur
     response = client.post('/api/v1/users/', json={
         'first_name': 'John',
         'last_name': 'Doe',
@@ -24,7 +50,7 @@ def test_create_user(client):
     assert data['email'] == 'john.doe@example.com'
     assert 'id' in data
 
-    # Test duplicate email
+    # Test d'email en doublon
     response = client.post('/api/v1/users/', json={
         'first_name': 'Jane',
         'last_name': 'Doe',
@@ -34,15 +60,23 @@ def test_create_user(client):
     assert b'Email already registered' in response.data
 
 def test_get_users(client):
-    """Test get users endpoint"""
-    # Create a test user first
+    """
+    Teste l'endpoint de récupération de tous les utilisateurs.
+    
+    Ce test vérifie que l'API retourne correctement la liste de tous
+    les utilisateurs enregistrés dans l'application.
+    
+    Args:
+        client: Le client de test Flask fourni par la fixture
+    """
+    # Création d'un utilisateur de test
     client.post('/api/v1/users/', json={
         'first_name': 'Test',
         'last_name': 'User',
         'email': 'test.user@example.com'
     })
 
-    # Test get all users
+    # Test de récupération de tous les utilisateurs
     response = client.get('/api/v1/users/')
     assert response.status_code == 200
     data = json.loads(response.data)
@@ -50,8 +84,17 @@ def test_get_users(client):
     assert len(data) > 0
 
 def test_get_user_by_id(client):
-    """Test get user by ID endpoint"""
-    # Create a test user
+    """
+    Teste l'endpoint de récupération d'un utilisateur par son identifiant.
+    
+    Ce test vérifie:
+    1. La récupération correcte d'un utilisateur existant
+    2. La gestion appropriée des requêtes pour des utilisateurs inexistants
+    
+    Args:
+        client: Le client de test Flask fourni par la fixture
+    """
+    # Création d'un utilisateur de test
     response = client.post('/api/v1/users/', json={
         'first_name': 'Get',
         'last_name': 'User',
@@ -59,19 +102,29 @@ def test_get_user_by_id(client):
     })
     user_id = json.loads(response.data)['id']
 
-    # Test get existing user
+    # Test de récupération d'un utilisateur existant
     response = client.get(f'/api/v1/users/{user_id}')
     assert response.status_code == 200
     data = json.loads(response.data)
     assert data['id'] == user_id
 
-    # Test get non-existent user
+    # Test de récupération d'un utilisateur inexistant
     response = client.get('/api/v1/users/nonexistent-id')
     assert response.status_code == 404
 
 def test_update_user(client):
-    """Test update user endpoint"""
-    # Create a test user
+    """
+    Teste l'endpoint de mise à jour d'un utilisateur.
+    
+    Ce test vérifie:
+    1. La mise à jour réussie d'un utilisateur existant
+    2. La gestion des tentatives de mise à jour d'utilisateurs inexistants
+    3. Le rejet de données invalides lors de la mise à jour
+    
+    Args:
+        client: Le client de test Flask fourni par la fixture
+    """
+    # Création d'un utilisateur de test
     response = client.post('/api/v1/users/', json={
         'first_name': 'Update',
         'last_name': 'User',
@@ -79,7 +132,7 @@ def test_update_user(client):
     })
     user_id = json.loads(response.data)['id']
 
-    # Test successful update
+    # Test de mise à jour réussie
     response = client.put(f'/api/v1/users/{user_id}', json={
         'first_name': 'Updated',
         'last_name': 'Name',
@@ -91,7 +144,7 @@ def test_update_user(client):
     assert data['last_name'] == 'Name'
     assert data['email'] == 'updated.user@example.com'
 
-    # Test update non-existent user
+    # Test de mise à jour d'un utilisateur inexistant
     response = client.put('/api/v1/users/nonexistent-id', json={
         'first_name': 'Test',
         'last_name': 'User',
@@ -99,9 +152,9 @@ def test_update_user(client):
     })
     assert response.status_code == 404
 
-    # Test update with invalid data
+    # Test de mise à jour avec des données invalides
     response = client.put(f'/api/v1/users/{user_id}', json={
-        'first_name': '',  # Empty name should be invalid
+        'first_name': '',  # Un prénom vide devrait être invalide
         'last_name': 'Test',
         'email': 'test@example.com'
     })
