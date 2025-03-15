@@ -1,8 +1,8 @@
-# Diagramme de Classe pour les Modèles SQLAlchemy
+# Class Diagram for SQLAlchemy Models
 
-Ce diagramme représente les classes Python utilisées dans le projet HBnB, montrant comment les modèles SQLAlchemy sont structurés et liés.
+This diagram represents the Python classes used in the HBnB project, showing how SQLAlchemy models are structured and related.
 
-## Diagramme de classe complet
+## Complete Class Diagram
 
 ```mermaid
 classDiagram
@@ -87,19 +87,19 @@ classDiagram
     Place "*" --> "*" Amenity : has
 ```
 
-## Explication des relations
+## Explanation of Relationships
 
-1. **Héritage** :
-   - Toutes les classes de modèle (User, Place, Review, Amenity) héritent de BaseModel
-   - BaseModel fournit les attributs et méthodes communs comme id, created_at, updated_at, save(), update(), to_dict()
+1. **Inheritance**:
+   - All model classes (User, Place, Review, Amenity) inherit from BaseModel
+   - BaseModel provides common attributes and methods like id, created_at, updated_at, save(), update(), to_dict()
 
-2. **Relations entre classes** :
-   - User - Place : Un utilisateur peut posséder plusieurs lieux (one-to-many)
-   - User - Review : Un utilisateur peut écrire plusieurs avis (one-to-many)
-   - Place - Review : Un lieu peut avoir plusieurs avis (one-to-many)
-   - Place - Amenity : Un lieu peut avoir plusieurs équipements et un équipement peut être associé à plusieurs lieux (many-to-many)
+2. **Class Relationships**:
+   - User - Place: A user can own multiple places (one-to-many)
+   - User - Review: A user can write multiple reviews (one-to-many)
+   - Place - Review: A place can have multiple reviews (one-to-many)
+   - Place - Amenity: A place can have multiple amenities and an amenity can be associated with multiple places (many-to-many)
 
-## Diagramme des repositories
+## Repository Diagram
 
 ```mermaid
 classDiagram
@@ -169,7 +169,7 @@ classDiagram
     SQLAlchemyRepository <|-- AmenityRepository
 ```
 
-## Diagramme de la façade
+## Facade Diagram
 
 ```mermaid
 classDiagram

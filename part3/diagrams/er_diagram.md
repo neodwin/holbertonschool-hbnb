@@ -1,8 +1,8 @@
 # Entity-Relationship Diagram for HBnB Database
 
-Ce diagramme représente la structure de la base de données du projet HBnB, montrant les relations entre les différentes entités.
+This diagram represents the database structure of the HBnB project, showing the relationships between the different entities.
 
-## Diagramme ER complet
+## Complete ER Diagram
 
 ```mermaid
 erDiagram
@@ -59,34 +59,34 @@ erDiagram
     PLACE_AMENITY }|--|| AMENITIES : "belongs to"
 ```
 
-## Explication des relations
+## Explanation of Relationships
 
 1. **Users - Places** (One-to-Many):
-   - Un utilisateur peut posséder plusieurs lieux
-   - Chaque lieu appartient à un seul utilisateur
+   - A user can own multiple places
+   - Each place belongs to a single user
 
 2. **Users - Reviews** (One-to-Many):
-   - Un utilisateur peut écrire plusieurs avis
-   - Chaque avis est écrit par un seul utilisateur
+   - A user can write multiple reviews
+   - Each review is written by a single user
 
 3. **Places - Reviews** (One-to-Many):
-   - Un lieu peut avoir plusieurs avis
-   - Chaque avis concerne un seul lieu
+   - A place can have multiple reviews
+   - Each review concerns a single place
 
 4. **Places - Amenities** (Many-to-Many):
-   - Un lieu peut avoir plusieurs équipements
-   - Un équipement peut être associé à plusieurs lieux
-   - Cette relation est implémentée via la table d'association PLACE_AMENITY
+   - A place can have multiple amenities
+   - An amenity can be associated with multiple places
+   - This relationship is implemented through the PLACE_AMENITY association table
 
-## Légende
+## Legend
 
-- PK: Primary Key (Clé primaire)
-- FK: Foreign Key (Clé étrangère)
-- UK: Unique Key (Clé unique)
+- PK: Primary Key
+- FK: Foreign Key
+- UK: Unique Key
 
-## Diagrammes détaillés par entité
+## Detailed Diagrams by Entity
 
-### User et ses relations
+### User and its relationships
 
 ```mermaid
 erDiagram
@@ -115,7 +115,7 @@ erDiagram
     USERS ||--o{ REVIEWS : "writes"
 ```
 
-### Place et ses relations
+### Place and its relationships
 
 ```mermaid
 erDiagram
@@ -155,7 +155,7 @@ erDiagram
     PLACE_AMENITY }|--|| PLACES : "belongs to"
 ```
 
-### Review et ses relations
+### Review and its relationships
 
 ```mermaid
 erDiagram
@@ -181,7 +181,7 @@ erDiagram
     PLACES ||--o{ REVIEWS : "has"
 ```
 
-### Amenity et ses relations
+### Amenity and its relationships
 
 ```mermaid
 erDiagram

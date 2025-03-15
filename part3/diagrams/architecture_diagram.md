@@ -1,28 +1,28 @@
-# Diagramme d'Architecture pour HBnB
+# Architecture Diagram for HBnB
 
-Ce diagramme représente l'architecture globale de l'application HBnB, montrant les différentes couches et leurs interactions.
+This diagram represents the overall architecture of the HBnB application, showing the different layers and their interactions.
 
-## Architecture en couches
+## Layered Architecture
 
 ```mermaid
 flowchart TD
-    subgraph "Couche Présentation"
-        API[API REST]
+    subgraph "Presentation Layer"
+        API[REST API]
         JWT[JWT Authentication]
     end
     
-    subgraph "Couche Métier"
+    subgraph "Business Layer"
         Facade[HBnBFacade]
-        Validation[Validation des données]
+        Validation[Data Validation]
     end
     
-    subgraph "Couche Persistance"
+    subgraph "Persistence Layer"
         Repositories[Repositories]
         ORM[SQLAlchemy ORM]
     end
     
-    subgraph "Couche Données"
-        DB[(Base de données)]
+    subgraph "Data Layer"
+        DB[(Database)]
     end
     
     API --> JWT
@@ -33,11 +33,11 @@ flowchart TD
     ORM --> DB
 ```
 
-## Architecture détaillée
+## Detailed Architecture
 
 ```mermaid
 flowchart TD
-    subgraph "Couche Présentation"
+    subgraph "Presentation Layer"
         UsersAPI[Users API]
         PlacesAPI[Places API]
         ReviewsAPI[Reviews API]
@@ -46,18 +46,18 @@ flowchart TD
         JWT[JWT Authentication]
     end
     
-    subgraph "Couche Métier"
+    subgraph "Business Layer"
         Facade[HBnBFacade]
     end
     
-    subgraph "Couche Persistance"
+    subgraph "Persistence Layer"
         UserRepo[UserRepository]
         PlaceRepo[PlaceRepository]
         ReviewRepo[ReviewRepository]
         AmenityRepo[AmenityRepository]
     end
     
-    subgraph "Couche Données"
+    subgraph "Data Layer"
         DB[(SQLite/MySQL)]
     end
     
@@ -80,15 +80,15 @@ flowchart TD
     AmenityRepo --> DB
 ```
 
-## Flux d'authentification
+## Authentication Flow
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant API as API REST
+    participant API as REST API
     participant Facade as HBnBFacade
     participant Repository as UserRepository
-    participant DB as Base de données
+    participant DB as Database
     
     Client->>API: POST /api/v1/auth/login
     API->>Facade: authenticate_user(email, password)
@@ -111,16 +111,16 @@ sequenceDiagram
     API-->>Client: User data (JSON)
 ```
 
-## Flux de création d'un lieu
+## Place Creation Flow
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant API as API REST
+    participant API as REST API
     participant Facade as HBnBFacade
     participant PlaceRepo as PlaceRepository
     participant UserRepo as UserRepository
-    participant DB as Base de données
+    participant DB as Database
     
     Client->>API: POST /api/v1/places/ (with JWT)
     API->>API: verify_jwt()
