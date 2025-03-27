@@ -48,8 +48,17 @@ class UserRepository(SQLAlchemyRepository):
         if self.get_by_email(user_data.get('email')):
             raise ValueError('Email already registered')
         
-        # Création et ajout de l'utilisateur
+        # Récupération et hachage du mot de passe si présent
+        password = user_data.pop('password', None)
+        
+        # Création de l'utilisateur sans mot de passe
         user = User(**user_data)
+        
+        # Hachage du mot de passe après création de l'utilisateur
+        if password:
+            user.hash_password(password)
+            
+        # Ajout de l'utilisateur à la base de données
         self.add(user)
         return user
     
@@ -77,7 +86,12 @@ class UserRepository(SQLAlchemyRepository):
             existing_user = self.get_by_email(user_data['email'])
             if existing_user:
                 raise ValueError('Email already registered')
+        
+        # Gestion du mot de passe (hachage) séparément
+        if 'password' in user_data:
+            password = user_data.pop('password')
+            user.hash_password(password)
                 
-        # Mise à jour de l'utilisateur
+        # Mise à jour des autres données de l'utilisateur
         user.update(user_data)
-        return user 
+        return user

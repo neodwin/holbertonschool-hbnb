@@ -77,7 +77,7 @@ class User(BaseModel):
         """
         raise AttributeError('Le mot de passe n\'est pas un attribut lisible')
         
-    def set_password(self, password):
+    def hash_password(self, password):
         """
         Hache et stocke le mot de passe de l'utilisateur.
         
@@ -93,8 +93,18 @@ class User(BaseModel):
             raise ValueError("Le mot de passe doit comporter au moins 8 caractères")
         # Génère un hash bcrypt du mot de passe
         self._password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+    
+    # Méthode existante renommée comme alias de hash_password pour la compatibilité
+    def set_password(self, password):
+        """
+        Alias de hash_password pour maintenir la compatibilité.
         
-    def check_password(self, password):
+        Args:
+            password (str): Mot de passe en texte brut à hacher
+        """
+        return self.hash_password(password)
+        
+    def verify_password(self, password):
         """
         Vérifie si le mot de passe fourni correspond au hash stocké.
         
@@ -108,6 +118,19 @@ class User(BaseModel):
             return False
         # Compare le hash stocké avec un hash du mot de passe fourni
         return bcrypt.check_password_hash(self._password_hash, password)
+    
+    # Méthode existante renommée comme alias de verify_password pour la compatibilité
+    def check_password(self, password):
+        """
+        Alias de verify_password pour maintenir la compatibilité.
+        
+        Args:
+            password (str): Mot de passe à vérifier
+            
+        Returns:
+            bool: True si le mot de passe correspond, False sinon
+        """
+        return self.verify_password(password)
 
     @staticmethod
     def validate_name(name, field):
