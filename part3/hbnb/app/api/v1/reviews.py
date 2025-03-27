@@ -7,6 +7,7 @@ des avis sur les logements, ainsi que pour lister les avis par logement.
 
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 # Création du namespace pour les avis
 api = Namespace('reviews', description='Opérations liées aux avis')
@@ -54,21 +55,59 @@ class ReviewList(Resource):
     @api.expect(review_model, validate=True)
     @api.response(201, 'Avis créé avec succès', review_response_model)
     @api.response(400, 'Données d\'entrée invalides')
+    @api.response(401, 'Non authentifié')
+    @api.response(403, 'Action non autorisée')
     @api.response(404, 'Utilisateur ou logement non trouvé')
     @api.marshal_with(review_response_model, code=201)
+    @jwt_required()
     def post(self):
         """
         Crée un nouvel avis sur un logement.
+        
+        L'utilisateur doit être authentifié.
+        L'utilisateur ne peut créer des avis que pour lui-même (sauf admin).
+        L'utilisateur ne peut pas noter son propre logement (sauf admin).
+        L'utilisateur ne peut pas noter deux fois le même logement (sauf admin).
         
         Returns:
             dict: Informations de l'avis créé
             
         Raises:
             400: Si les données fournies sont invalides
+            401: Si l'utilisateur n'est pas authentifié
+            403: Si l'utilisateur n'a pas les droits nécessaires
             404: Si l'utilisateur ou le logement n'existe pas
         """
+        review_data = api.payload
+        
+        # Récupérer l'identité de l'utilisateur et ses droits
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        
+        # Si ce n'est pas un admin et essaie de créer un avis pour quelqu'un d'autre
+        if not is_admin and review_data.get('user_id') != current_user_id:
+            api.abort(403, 'Unauthorized action')
+            
         try:
-            review = facade.create_review(api.payload)
+            # Vérifier que l'utilisateur ne note pas son propre logement (sauf admin)
+            place = facade.get_place(review_data.get('place_id'))
+            if not place:
+                api.abort(404, 'Logement non trouvé')
+                
+            # Si ce n'est pas un admin et c'est son propre logement
+            if not is_admin and place.owner_id == current_user_id:
+                api.abort(400, 'You cannot review your own place')
+                
+            # Vérifier que l'utilisateur n'a pas déjà noté ce logement (sauf admin)
+            # Si c'est un admin qui crée au nom de quelqu'un d'autre, vérifier pour cet utilisateur
+            user_id_to_check = review_data.get('user_id')
+            existing_review = facade.review_repo.get_by_place_and_user(review_data.get('place_id'), user_id_to_check)
+            
+            if not is_admin and existing_review:
+                api.abort(400, 'You have already reviewed this place')
+                
+            review = facade.create_review(review_data)
             return review, 201
         except ValueError as e:
             api.abort(400, str(e))
@@ -119,12 +158,19 @@ class ReviewResource(Resource):
     @api.doc('update_review')
     @api.expect(review_model)
     @api.response(200, 'Avis mis à jour avec succès', review_response_model)
+    @api.response(401, 'Non authentifié')
+    @api.response(403, 'Action non autorisée')
     @api.response(404, 'Avis non trouvé')
     @api.response(400, 'Données d\'entrée invalides')
     @api.marshal_with(review_response_model)
+    @jwt_required()
     def put(self, review_id):
         """
         Met à jour les informations d'un avis.
+        
+        L'utilisateur doit être authentifié.
+        L'utilisateur ne peut modifier que ses propres avis, sauf les administrateurs
+        qui peuvent modifier n'importe quel avis.
         
         Args:
             review_id (str): Identifiant de l'avis à mettre à jour
@@ -133,9 +179,26 @@ class ReviewResource(Resource):
             dict: Informations de l'avis mises à jour
             
         Raises:
-            404: Si l'avis n'existe pas
             400: Si les données fournies sont invalides
+            401: Si l'utilisateur n'est pas authentifié
+            403: Si l'utilisateur n'a pas les droits nécessaires
+            404: Si l'avis n'existe pas
         """
+        # Récupérer l'avis existant
+        review = facade.get_review(review_id)
+        if not review:
+            api.abort(404, f"Avis avec l'id {review_id} non trouvé")
+        
+        # Vérifier que l'utilisateur a le droit de modifier cet avis
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        
+        # Les administrateurs peuvent modifier n'importe quel avis
+        # Si l'utilisateur n'est pas admin et n'est pas l'auteur de l'avis
+        if not is_admin and review.user_id != current_user_id:
+            api.abort(403, 'Unauthorized action')
+        
         try:
             review = facade.update_review(review_id, api.payload)
             if not review:
@@ -148,10 +211,17 @@ class ReviewResource(Resource):
     
     @api.doc('delete_review')
     @api.response(200, 'Avis supprimé avec succès')
+    @api.response(401, 'Non authentifié')
+    @api.response(403, 'Action non autorisée')
     @api.response(404, 'Avis non trouvé')
+    @jwt_required()
     def delete(self, review_id):
         """
         Supprime un avis.
+        
+        L'utilisateur doit être authentifié.
+        L'utilisateur ne peut supprimer que ses propres avis, sauf les administrateurs
+        qui peuvent supprimer n'importe quel avis.
         
         Args:
             review_id (str): Identifiant de l'avis à supprimer
@@ -160,11 +230,29 @@ class ReviewResource(Resource):
             dict: Message de confirmation
             
         Raises:
+            401: Si l'utilisateur n'est pas authentifié
+            403: Si l'utilisateur n'a pas les droits nécessaires
             404: Si l'avis n'existe pas
         """
+        # Récupérer l'avis existant
+        review = facade.get_review(review_id)
+        if not review:
+            api.abort(404, f"Avis avec l'id {review_id} non trouvé")
+            
+        # Vérifier que l'utilisateur a le droit de supprimer cet avis
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        
+        # Les administrateurs peuvent supprimer n'importe quel avis
+        # Si l'utilisateur n'est pas admin et n'est pas l'auteur de l'avis
+        if not is_admin and review.user_id != current_user_id:
+            api.abort(403, 'Unauthorized action')
+        
         success = facade.delete_review(review_id)
         if not success:
             api.abort(404, f"Avis avec l'id {review_id} non trouvé")
+            
         return {"message": "Avis supprimé avec succès"}
 
 @api.route('/places/<place_id>/reviews')

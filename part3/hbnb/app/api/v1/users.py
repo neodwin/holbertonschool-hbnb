@@ -40,43 +40,6 @@ user_response_model = api.model('UserResponse', {
     'updated_at': fields.String(description='Date de dernière mise à jour')
 })
 
-# Modèle de connexion utilisateur
-login_model = api.model('UserLoginModel', {
-    'email': fields.String(required=True, description='Adresse email'),
-    'password': fields.String(required=True, description='Mot de passe')
-})
-
-# Modèle de réponse pour le token
-token_model = api.model('TokenModel', {
-    'access_token': fields.String(description='Token JWT d\'accès')
-})
-
-@api.route('/login')
-class UserLogin(Resource):
-    """
-    Endpoint de connexion utilisateur.
-    Authentifie l'utilisateur et renvoie un token JWT.
-    """
-    @api.doc('user_login')
-    @api.expect(login_model, validate=True)
-    @api.response(200, 'Connexion réussie', token_model)
-    @api.response(401, 'Identifiants invalides')
-    def post(self):
-        """
-        Authentifie un utilisateur et génère un token JWT.
-        
-        Returns:
-            dict: Contenant le token JWT si l'authentification réussit
-            
-        Raises:
-            401: Si les identifiants sont invalides
-        """
-        data = api.payload
-        token = facade.authenticate_user(data['email'], data['password'])
-        if not token:
-            api.abort(401, 'Identifiants invalides')
-        return {'access_token': token}
-
 @api.route('/')
 class UserList(Resource):
     """
@@ -99,16 +62,35 @@ class UserList(Resource):
     @api.marshal_with(user_response_model)
     @api.response(201, 'Utilisateur créé avec succès', user_response_model)
     @api.response(400, 'Données d\'entrée invalides')
+    @api.response(401, 'Non authentifié')
+    @api.response(403, 'Action non autorisée')
+    @jwt_required(optional=True)
     def post(self):
         """
         Crée un nouvel utilisateur.
+        
+        Si l'utilisateur crée son premier compte (non connecté), il peut le faire.
+        Si l'utilisateur est déjà connecté, il doit être administrateur pour créer d'autres utilisateurs.
         
         Returns:
             dict: Informations de l'utilisateur créé
             
         Raises:
             400: Si les données fournies sont invalides ou si l'email est déjà utilisé
+            401: Si l'utilisateur n'est pas authentifié
+            403: Si l'utilisateur connecté n'a pas les privilèges d'administrateur
         """
+        # Vérifier si l'utilisateur est connecté
+        current_user_id = get_jwt_identity()
+        
+        # Si l'utilisateur est connecté, il doit être admin pour créer d'autres utilisateurs
+        if current_user_id:
+            claims = get_jwt()
+            is_admin = claims.get('is_admin', False)
+            
+            if not is_admin:
+                api.abort(403, "Admin privileges required")
+        
         try:
             user = facade.create_user(api.payload)
             return user, 201
@@ -154,6 +136,7 @@ class UserResource(Resource):
         """
         Met à jour les informations d'un utilisateur.
         Nécessite d'être connecté comme l'utilisateur concerné ou comme administrateur.
+        L'email et le mot de passe ne peuvent être modifiés que par les administrateurs.
         
         Args:
             user_id (str): Identifiant de l'utilisateur à mettre à jour
@@ -173,10 +156,17 @@ class UserResource(Resource):
         
         # Vérifier si l'utilisateur est admin ou s'il modifie son propre profil
         if not is_admin and current_user_id != user_id:
-            api.abort(403, "Vous n'avez pas la permission de modifier cet utilisateur")
+            api.abort(403, "Unauthorized action")
         
+        # Vérifier les restrictions sur l'email et le mot de passe
+        update_data = api.payload.copy()
+        
+        # Si ce n'est pas un admin et qu'il essaie de modifier l'email ou le mot de passe
+        if not is_admin and ('email' in update_data or 'password' in update_data):
+            api.abort(400, "You cannot modify email or password")
+            
         try:
-            user = facade.update_user(user_id, api.payload)
+            user = facade.update_user(user_id, update_data)
             if not user:
                 api.abort(404, f"Utilisateur avec l'id {user_id} non trouvé")
             return user
