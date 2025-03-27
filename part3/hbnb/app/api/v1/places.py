@@ -7,6 +7,7 @@ lister les logements ainsi que leurs avis (reviews).
 
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 # Création du namespace pour les logements
 api = Namespace('places', description='Opérations liées aux logements')
@@ -90,23 +91,40 @@ class PlaceList(Resource):
     @api.expect(place_model, validate=True)
     @api.response(201, 'Logement créé avec succès', place_response_model)
     @api.response(400, 'Données d\'entrée invalides')
+    @api.response(401, 'Non authentifié')
+    @api.response(403, 'Action non autorisée')
     @api.response(404, 'Propriétaire ou équipement non trouvé')
     @api.marshal_with(place_response_model, code=201)
+    @jwt_required()
     def post(self):
         """
         Enregistre un nouveau logement.
         
         Les données fournies sont validées selon le modèle place_model.
         Le propriétaire doit exister pour pouvoir créer un logement.
+        L'utilisateur doit être authentifié.
+        Un utilisateur ne peut créer des logements que pour lui-même, sauf 
+        les administrateurs qui peuvent créer des logements pour n'importe quel utilisateur.
         
         Returns:
             dict: Détails du logement créé
             
         Raises:
             400: Si les données sont invalides
+            401: Si l'utilisateur n'est pas authentifié
+            403: Si l'utilisateur n'a pas les droits nécessaires
             404: Si le propriétaire ou un équipement n'existe pas
         """
         place_data = api.payload
+        
+        # Vérifier que l'utilisateur ne peut créer un logement que pour lui-même
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        
+        # Si l'utilisateur n'est pas admin et essaie de créer un logement pour quelqu'un d'autre
+        if not is_admin and place_data.get('owner_id') != current_user_id:
+            api.abort(403, 'Unauthorized action')
 
         try:
             new_place = facade.create_place(place_data)
@@ -146,12 +164,19 @@ class PlaceResource(Resource):
     @api.doc('update_place')
     @api.expect(place_model)
     @api.response(200, 'Logement mis à jour avec succès', place_response_model)
+    @api.response(401, 'Non authentifié')
+    @api.response(403, 'Action non autorisée')
     @api.response(404, 'Logement non trouvé')
     @api.response(400, 'Données d\'entrée invalides')
     @api.marshal_with(place_response_model)
+    @jwt_required()
     def put(self, place_id):
         """
         Met à jour les détails d'un logement.
+        
+        L'utilisateur doit être authentifié.
+        L'utilisateur ne peut modifier que ses propres logements, sauf les administrateurs
+        qui peuvent modifier n'importe quel logement.
         
         Args:
             place_id (str): Identifiant unique du logement
@@ -161,15 +186,31 @@ class PlaceResource(Resource):
             
         Raises:
             400: Si les données sont invalides
+            401: Si l'utilisateur n'est pas authentifié
+            403: Si l'utilisateur n'a pas les droits nécessaires
             404: Si le logement n'existe pas
         """
         place_data = api.payload
         
+        # Récupérer le logement existant
+        place = facade.get_place(place_id)
+        if not place:
+            api.abort(404, 'Logement non trouvé')
+        
+        # Vérifier que l'utilisateur est autorisé à modifier ce logement
+        current_user_id = get_jwt_identity()
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        
+        # Si l'utilisateur n'est pas admin et n'est pas le propriétaire
+        if not is_admin and place.owner_id != current_user_id:
+            api.abort(403, 'Unauthorized action')
+            
         try:
-            place = facade.update_place(place_id, place_data)
-            if not place:
+            updated_place = facade.update_place(place_id, place_data)
+            if not updated_place:
                 api.abort(404, 'Logement non trouvé')
-            return place.to_dict()
+            return updated_place.to_dict()
         except ValueError as e:
             api.abort(400, str(e))
 
