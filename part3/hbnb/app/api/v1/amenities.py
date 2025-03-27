@@ -7,6 +7,7 @@ des équipements qui peuvent être associés aux logements.
 
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 # Création du namespace pour les équipements
 api = Namespace('amenities', description='Opérations liées aux équipements')
@@ -44,16 +45,30 @@ class AmenityList(Resource):
     @api.expect(amenity_model, validate=True)
     @api.response(201, 'Équipement créé avec succès', amenity_response_model)
     @api.response(400, 'Données d\'entrée invalides')
+    @api.response(401, 'Non authentifié')
+    @api.response(403, 'Action non autorisée')
+    @jwt_required()
     def post(self):
         """
         Crée un nouvel équipement.
+        
+        Seuls les administrateurs peuvent créer des équipements.
         
         Returns:
             dict: Informations de l'équipement créé
             
         Raises:
             400: Si les données fournies sont invalides ou si le nom est déjà utilisé
+            401: Si l'utilisateur n'est pas authentifié
+            403: Si l'utilisateur n'a pas les droits nécessaires
         """
+        # Vérification des droits administrateur
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        
+        if not is_admin:
+            api.abort(403, 'Admin privileges required')
+            
         try:
             amenity = facade.create_amenity(api.payload)
             return amenity, 201
@@ -91,11 +106,16 @@ class AmenityResource(Resource):
     @api.doc('update_amenity')
     @api.expect(amenity_model)
     @api.response(200, 'Équipement mis à jour avec succès', amenity_response_model)
+    @api.response(401, 'Non authentifié')
+    @api.response(403, 'Action non autorisée')
     @api.response(404, 'Équipement non trouvé')
     @api.response(400, 'Données d\'entrée invalides')
+    @jwt_required()
     def put(self, amenity_id):
         """
         Met à jour les informations d'un équipement.
+        
+        Seuls les administrateurs peuvent modifier des équipements.
         
         Args:
             amenity_id (str): Identifiant de l'équipement à mettre à jour
@@ -104,9 +124,18 @@ class AmenityResource(Resource):
             dict: Informations de l'équipement mises à jour
             
         Raises:
-            404: Si l'équipement n'existe pas
             400: Si les données fournies sont invalides
+            401: Si l'utilisateur n'est pas authentifié
+            403: Si l'utilisateur n'a pas les droits nécessaires
+            404: Si l'équipement n'existe pas
         """
+        # Vérification des droits administrateur
+        claims = get_jwt()
+        is_admin = claims.get('is_admin', False)
+        
+        if not is_admin:
+            api.abort(403, 'Admin privileges required')
+            
         try:
             amenity = facade.update_amenity(amenity_id, api.payload)
             if not amenity:
