@@ -25,3 +25,5 @@ Le projet **HBnB - Simple Web Client** se concentre sur le développement front-
 
    ```bash
    git clone https://github.com/neodwin/holbertonschool-hbnb
+
+   * Auteur : [Edwin Dervaux](https://github.com/neodwin)
