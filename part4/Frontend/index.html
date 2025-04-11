@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HBnB - Find Your Perfect Place</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" href="images/icon.png" type="image/png">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <img src="images/logo.png" alt="HBnB Logo" class="logo">
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="login.html" class="login-button" id="login-link">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Find Your Perfect Place</h1>
+
+            <div class="filter-section">
+                <label for="price-filter">Max Price per Night:</label>
+                <select id="price-filter">
+                    <option value="10">$10</option>
+                    <option value="50">$50</option>
+                    <option value="100">$100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+
+            <section id="places-list">
+                <!-- Place cards will be dynamically loaded here -->
+                <!-- Example place card for styling purposes -->
+                <div class="place-card">
+                    <img src="images/place1.jpg" alt="Cozy Apartment">
+                    <h2>Cozy Apartment</h2>
+                    <p class="price">$65 per night</p>
+                    <a href="place.html?id=ce57d06d-46ed-4f14-a87d-59da27cd97f3" class="details-button">View Details</a>
+                </div>
+
+                <div class="place-card">
+                    <img src="images/place2.jpg" alt="Luxury Villa">
+                    <h2>Luxury Villa</h2>
+                    <p class="price">$120 per night</p>
+                    <a href="place.html?id=02f97abf-9ee9-4f3a-bac1-784dc6ad22ae" class="details-button">View Details</a>
+                </div>
+
+                <div class="place-card">
+                    <img src="images/place3.jpg" alt="Beach House">
+                    <h2>Beach House</h2>
+                    <p class="price">$95 per night</p>
+                    <a href="place.html?id=3607a193-68d2-4fd9-b59a-767daedea11c" class="details-button">View Details</a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 HBnB. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/scripts.js"></script>
+</body>
+
+</html>
