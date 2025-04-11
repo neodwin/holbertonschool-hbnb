@@ -89,11 +89,16 @@ J'ai implémenté la fonctionnalité de login qui utilise l'API backend pour aut
 
 ## Utilisation
 
-Pour tester la fonctionnalité de login, vous pouvez utiliser les identifiants suivants (basés sur les valeurs par défaut dans config.py) :
+Pour tester la fonctionnalité de login, vous pouvez utiliser les identifiants suivants (basés sur les valeurs par défaut dans config.py & add_johndoe.py) :
 - Email : admin@hbnb.io
 - Mot de passe : admin1234
 
 Ces identifiants correspondent à l'utilisateur administrateur créé par défaut dans la configuration du backend.
+
+- Email : johndoe@test.com
+- Mot de passe : johndoe1234
+
+Ces identifiants correspondent à l'utilisateur classique créé par défaut dans la configuration du backend.
 
 ## Remarques
 
